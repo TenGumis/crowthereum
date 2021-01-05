@@ -1,0 +1,35 @@
+{
+  "name": "crowthereum",
+  "version": "1.0.0",
+  "description": "Crowdfounding platform Powered By Ethereum",
+  "main": "truffle-config.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "dev": "lite-server",
+    "test": "echo \"Error: no test specified\" && sexit 1"
+  },
+  "contributors": [
+    {
+      "name": "Wiktor Daniec"
+    },
+    {
+      "name": "Michal Zwonek"
+    },
+    {
+      "name": "Mateusz Pabian"
+    }
+  ],
+  "license": "MIT",
+  "devDependencies": {
+    "@truffle/contract": "4.3.4",
+    "bootstrap": "^4.5.3",
+    "chai": "^4.1.2",
+    "chai-as-promised": "^7.1.1",
+    "chai-bignumber": "^2.0.2",
+    "lite-server": "^2.3.0",
+    "nodemon": "^1.17.3",
+    "truffle": "^5.1.60"
+  }
+}
