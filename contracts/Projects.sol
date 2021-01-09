@@ -4,11 +4,12 @@ pragma solidity ^0.5.0;
 contract Projects {
 
   struct Project {
-    uint descriptionHash;
-    uint cost;
+    uint projectId;
+    uint goal;
     uint duration;
     uint investmentDeadline;
     address owner;
+    uint balance;
     bool isFinished;
     mapping(address => uint) pledgeOf;
   }
@@ -18,12 +19,17 @@ contract Projects {
     address owner
   );
 
+  event FundSent(
+    uint projectId,
+    uint amount
+  );
+
   uint public projectCount = 0;
   mapping(uint => Project) public projects;
 
-  function createProject(uint _descriptionHash, uint _cost, uint _duration, uint _investmentDuration) public{
+  function createProject(uint _projectId, uint _goal, uint _duration, uint _investmentDuration) public{
     projectCount++;
-    Project memory currentProject = Project(_descriptionHash, _cost, _duration, now + _investmentDuration, msg.sender, false);
+    Project memory currentProject = Project(_projectId, _goal, _duration, now + _investmentDuration, msg.sender, 0, false);
     projects[projectCount] = currentProject;
     emit ProjectCreated(projectCount, currentProject.owner);
   }
@@ -36,7 +42,21 @@ contract Projects {
     require(msg.value == amount);
 
     projects[_projectId].pledgeOf[msg.sender] += amount;
+    projects[_projectId].balance += amount;
+    emit FundSent(currentProject.projectId, amount);
   }
 
+  function claimFunds(uint256 _projectId) public {
+    // mozliwe, ze tu powinno byc storage zamiast memory ( reference vs local copy)
+
+    require(projects[_projectId].balance >= projects[_projectId].goal);
+    require(msg.sender == projects[_projectId].owner);
+
+    uint projectBalance = projects[_projectId].balance;
+    projects[_projectId].balance = 0; // czy to nie jest jakies risky?
+    msg.sender.transfer(projectBalance);
+
+    emit FundSent(projects[_projectId].projectId, projects[_projectId].balance);
+  }
 
 }
