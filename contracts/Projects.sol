@@ -38,6 +38,5 @@ contract Projects {
     projects[_projectId].pledgeOf[msg.sender] += amount;
   }
 
-  function 
 
 }

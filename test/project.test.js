@@ -37,7 +37,6 @@ contract('Projects', (accounts) => {
     assert.strictEqual(projectId, projectCount.toNumber())
 
     result = await this.projects.fundProject(projectId, amount, {from: account_two, value: amount})
-    console.log(result)
     // result = await this.projects.fundProject(projectId, 0.1)
   })
 })
