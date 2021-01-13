@@ -75,54 +75,20 @@ App = {
       // Render Account
       $('#account').html(App.account)
   
-      // Render Tasks
-      await App.renderProjects()
+      // Render Projects
+      await App.renderProjectDetails()
   
       // Update loading state
       App.setLoading(false)
     },
   
-    renderProjects: async () => {
-      // Load the total task count from the blockchain
-      const taskCount = await App.projects.projectCount()
-      const $taskTemplate = $('.projectTemplate')
-  
-      // Render out each task with a new task template
-      for (var i = 1; i <= taskCount; i++) {
-        // Fetch the task data from the blockchain
-        const task = await App.projects.projects(i)
-        const projectId = task[0].toNumber()
-        const projectContent = task[0].toNumber()
-        const taskCompleted = task[6]
+    renderProjectDetails: async () => {
 
-        const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
-          return proj.id == projectId });
-  
-        // Create the html for the task
-        const $projectTemplate = $taskTemplate.clone()
-        $projectTemplate.find('.content').html(projectFromBulletin.title)
-        $projectTemplate.find('input')
-                        .prop('name', projectId)
-                        .prop('checked', "HelloWorld")
-                        // .on('click', App.toggleCompleted)
-  
-        // Put the task in the correct list
-        if (taskCompleted) {
-          $('#completedTaskList').append($projectTemplate)
-        } else {
-          $('#projectList').append($projectTemplate)
-        }
+      let params = (new URL(document.location)).searchParams;
+      let id = params.get("id");
 
-        $projectTemplate.on('click', 'button', function(evt) {
-          console.log(projectId)
-          window.location.href = "/project-details.html?id=" + projectFromBulletin.id;
-
-          
-        })
-  
-        // Show the task
-        $projectTemplate.show()
-      }
+      // Project id for which we need to render data
+      console.log("id:" + id)
     },
   
     setLoading: (boolean) => {
