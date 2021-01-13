@@ -150,7 +150,16 @@ App = {
     if (title == "" || description == "" || deadline == "") {
       alert("You must specify title, description and deadline.")
     }
-    await App.projects.createProject(hash, parseInt(deadline),parseInt(deadline),parseInt(deadline));
+
+    const milestones = App.getMilestonesList();
+    const goals = milestones.map( function(milestone) { 
+      return milestone.cost
+    });
+    const durations = milestones.map( function(milestone) { 
+      return milestone.deadline
+    });
+
+    await App.projects.createProject(hash, parseInt(deadline), goals, durations, milestones.length);
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
       body: JSON.stringify({
