@@ -1,13 +1,3 @@
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  myNodelist[i].appendChild(span);
-}
-
 // https://ethereum.stackexchange.com/questions/38863/how-to-generate-keccak256string-integer-from-javascript
 function solSha3 (...args) {
   args = args.map(arg => {
@@ -32,12 +22,6 @@ function solSha3 (...args) {
 }
 // Click on a close button to hide the current list item
 var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-  close[i].onclick = function() {
-    this.parentElement.parentElement.removeChild(this.parentElement);
-  }
-}
 
 App = {
   loading: false,
@@ -99,7 +83,7 @@ App = {
   },
 
   getMilestonesList: () => {
-    var t1 = document.getElementById('myUL');
+    var t1 = document.getElementById('milestonesList');
     var items = t1.getElementsByTagName('li');
     result = []
     for (var j = 0, m = items.length; j < m; j++) {
@@ -128,19 +112,21 @@ App = {
   addMilestone: () => {
     var li = document.createElement("li");
     var milestoneDeadline = $('#milestoneDeadline').val();
-    var milestoneCost = document.getElementById("milestoneCost").value;
+    var milestoneCost = $('#milestoneCost').val();
     var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost));
 
     li.appendChild(t1);
     if (milestoneDeadline == "" || milestoneCost == "") {
       alert("You must specify both the deadline and cost of a milestone!");
+      return;
     } else {
-      document.getElementById("myUL").appendChild(li);
+      document.getElementById("milestonesList").appendChild(li);
     }
 
     document.getElementById("milestoneDeadline").value = "";
     document.getElementById("milestoneCost").value = "";
   
+    // Add a close button to the element's list.
     var span = document.createElement("SPAN");
     var txt = document.createTextNode("\u00D7");
     span.className = "close";
