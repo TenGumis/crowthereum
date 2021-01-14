@@ -17,9 +17,10 @@ Setup environment.
 
 ```bash
 sudo apt install nodejs
-```
-
+``` 
 * install **[Ganache](https://www.trufflesuite.com/ganache)** which mocks Ethereum blockchain locally. You can also use [ganache-cli](https://github.com/trufflesuite/ganache-cli) to do it from commandline.
+
+* install **[MetaMask](https://metamask.io/download.html)** and set it up  (register one of Ganache's private keys in MetaMask).
 
 * install **npm**
 
@@ -33,6 +34,32 @@ sudo apt install npm
 # for now in version 5.0.2
 sudo npm install -g truffle@5.0.2
 ```
+## How to run the project
+
+* run Ganache and have MetaMask connected to Ganache's instance
+
+* compile the project
+
+```bash
+truffle compile
+```
+
+* migrate the smart contract
+
+```bash
+truffle migrate
+```
+
+* run the front-end
+
+```bash
+npm run dev
+```
+
+## Known issues
+
+* ```Error: EACCES: permission denied,[...]``` while running truffle compile or truffle migrate, a very quick, easy and possibly not-state-of-the-art workaround is to use ``` sudo truffle compile```. 
+
 
 ## License
 
