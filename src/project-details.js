@@ -89,6 +89,17 @@ App = {
 
       // Project id for which we need to render data
       console.log("id:" + id)
+      
+      let p = document.getElementById('project-details')
+
+      const bulletinBoard = await $.getJSON('BulletinBoard.json')
+      var projectList = bulletinBoard.projects
+      for (var i = 0;i < projectList.length;i++) {
+        if (projectList[i].hash == id) {
+          let str = projectList[i].title + "\n" + projectList[i].description + "\n" + "Investment duration: " + projectList[i].investmentDuration;
+          p.innerText = str
+        }
+      }
     },
   
     setLoading: (boolean) => {
@@ -102,12 +113,6 @@ App = {
         loader.hide()
         content.show()
       }
-    },
-
-    projectDetails: async (event) => { 
-      let arg1 = event.target.getAttribute('content');
-      console.log("Redirect");
-      console.log(arg1);
     }
   }
   

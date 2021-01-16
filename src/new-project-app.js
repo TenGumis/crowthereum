@@ -151,6 +151,7 @@ App = {
       alert("You must specify title, description and deadline.")
     }
     await App.projects.createProject(hash, parseInt(deadline),parseInt(deadline),parseInt(deadline));
+    coonsoleLog(":)")
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
       body: JSON.stringify({
