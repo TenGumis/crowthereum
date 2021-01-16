@@ -109,4 +109,9 @@ contract Projects {
     emit FundSent(projects[projectIndex].projectHash, projects[projectIndex].balance);
   }
 
+
+  function isProjectCompleted(uint _projectHash) public view returns (bool) {
+    Project storage project = projects[projectIdx[_projectHash]];
+    return (project.currentMilestone == project.numberOfMilestones);
+  }
 }
