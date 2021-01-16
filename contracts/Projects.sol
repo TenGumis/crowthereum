@@ -1,15 +1,15 @@
- 
 pragma solidity ^0.5.0;
 
 contract Projects {
 
   struct Project {
-    uint projectId;
+    uint projectHash;
+    address owner;
     uint investmentDeadline;
     uint numberOfMilestones;
-    address owner;
     uint balance;
-    bool isFinished;
+    uint currentMilestone;
+    uint projectGoal;
     mapping(uint => Milestone) milestones;
     mapping(address => uint) pledgeOf;
   }
@@ -25,65 +25,68 @@ contract Projects {
   );
 
   event FundSent(
-    uint projectId,
+    uint _projectHash,
     uint amount
   );
 
   uint public projectCount = 0;
   mapping(uint => Project) public projects;
+  mapping(uint => uint) public projectIdx;
 
-  function createProject(uint _projectId, uint _goal, uint _duration, uint _investmentDuration) public{
-    projectCount++;
-    
-    Project memory currentProject = Project(_projectId, now + _investmentDuration, 1, msg.sender, 0, false);    
+
+  function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
+    Project memory currentProject = Project(_projectHash, msg.sender, now + _investmentDuration, _numberOfMilestones, 0, 0, 0);
     projects[projectCount] = currentProject;
-    projects[projectCount].milestones[0] = Milestone(_goal, _duration);
-
-    emit ProjectCreated(projectCount, currentProject.owner);
-  }
-
-  function createProject(uint _projectId, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
-    projectCount++;
-
-    Project memory currentProject = Project(_projectId, now + _investmentDuration, _numberOfMilestones, msg.sender, 0, false);
-    projects[projectCount] = currentProject;
+    projectIdx[_projectHash] = projectCount;
     
+    uint _projectGoal = 0;
     for (uint i=0; i<_numberOfMilestones; i++) {
+      _projectGoal +=  projects[_projectHash].milestones[i].goal;
       projects[projectCount].milestones[i].goal = _goals[i];
       projects[projectCount].milestones[i].duration = _durations[i];
     }
 
-    emit ProjectCreated(projectCount, currentProject.owner);
+    currentProject.projectGoal = _projectGoal;
+
+    projectCount++;
+    emit ProjectCreated(projectCount-1, currentProject.owner);
   }
 
-  function fundProject(uint256 _projectId, uint256 amount) public payable{
-    Project memory currentProject = projects[_projectId];
+  function fundProject(uint256 _projectHash, uint256 _amount) public payable{
+    Project memory currentProject = projects[_projectHash];
     
-    require(currentProject.isFinished == false); // mozliwe, ze da sie jak w pythonie
+    require(projects[_projectHash].balance < projects[_projectHash].projectGoal);
     require(currentProject.investmentDeadline >= now);
-    require(msg.value == amount);
+    require(msg.value == _amount);
 
-    projects[_projectId].pledgeOf[msg.sender] += amount;
-    projects[_projectId].balance += amount;
-    emit FundSent(currentProject.projectId, amount);
+    if(currentProject.projectGoal < currentProject.balance + _amount) {
+      uint investedAmount = currentProject.projectGoal - currentProject.balance;  
+      uint excessValue = _amount - investedAmount;
+
+      projects[_projectHash].pledgeOf[msg.sender] += investedAmount;
+      projects[_projectHash].balance += investedAmount;
+
+      msg.sender.transfer(excessValue);
+      emit FundSent(currentProject.projectHash, investedAmount);
+
+    } else {
+      projects[_projectHash].pledgeOf[msg.sender] += _amount;
+      projects[_projectHash].balance += _amount;
+      emit FundSent(currentProject.projectHash, _amount);
+    }
   }
 
-  function claimFunds(uint256 _projectId) public {
+  function claimFunds(uint256 _projectHash) public {
     // mozliwe, ze tu powinno byc storage zamiast memory ( reference vs local copy)
 
-    uint projectGoal = 0;
-    for (uint i=0; i< projects[_projectId].numberOfMilestones; i++) {
-      projectGoal +=  projects[_projectId].milestones[i].goal;
-    }
+    require(projects[_projectHash].balance >= projects[_projectHash].projectGoal);
+    require(msg.sender == projects[_projectHash].owner);
 
-    require(projects[_projectId].balance >= projectGoal);
-    require(msg.sender == projects[_projectId].owner);
-
-    uint projectBalance = projects[_projectId].balance;
-    projects[_projectId].balance = 0; // czy to nie jest jakies risky?
+    uint projectBalance = projects[_projectHash].balance;
+    projects[_projectHash].balance = 0; // czy to nie jest jakies risky?
     msg.sender.transfer(projectBalance);
 
-    emit FundSent(projects[_projectId].projectId, projects[_projectId].balance);
+    emit FundSent(projects[_projectHash].projectHash, projects[_projectHash].balance);
   }
 
 }
