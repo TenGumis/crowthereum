@@ -98,33 +98,34 @@ App = {
         const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
           return proj.id == projectId });
   
-        // Create the html for the taskz
-        console.log(projectFromBulletin)
-        console.log(projectFromBulletin.title)
+        // Create the html for the task
+        try 
+        {
+          const $projectTemplate = $taskTemplate.clone()
+          $projectTemplate.find('.content').html(projectFromBulletin.title)
+          $projectTemplate.find('input')
+                          .prop('name', projectId)
+                          .prop('checked', "HelloWorld")
+                          // .on('click', App.toggleCompleted)
+    
+          // Put the task in the correct list
+          if (taskCompleted) {
+            $('#completedTaskList').append($projectTemplate)
+          } else {
+            $('#projectList').append($projectTemplate)
+          }
 
-        const $projectTemplate = $taskTemplate.clone()
-        $projectTemplate.find('.content').html(projectFromBulletin.title)
-        $projectTemplate.find('input')
-                        .prop('name', projectId)
-                        .prop('checked', "HelloWorld")
-                        // .on('click', App.toggleCompleted)
-  
-        // Put the task in the correct list
-        if (taskCompleted) {
-          $('#completedTaskList').append($projectTemplate)
-        } else {
-          $('#projectList').append($projectTemplate)
+          $projectTemplate.on('click', 'button', function(evt) {
+            console.log(projectId)
+            window.location.href = "/project-details.html?id=" + projectFromBulletin.id;
+            
+          })
+          // Show the task
+          $projectTemplate.show()
+        } catch(error)
+        {
+          console.log(error)
         }
-
-        $projectTemplate.on('click', 'button', function(evt) {
-          console.log(projectId)
-          window.location.href = "/project-details.html?id=" + projectFromBulletin.id;
-
-          
-        })
-  
-        // Show the task
-        $projectTemplate.show()
       }
     },
   
