@@ -88,17 +88,20 @@ App = {
       const $taskTemplate = $('.projectTemplate')
   
       // Render out each task with a new task template
-      for (var i = 1; i <= taskCount; i++) {
+      for (var i = 0; i < taskCount; i++) {
         // Fetch the task data from the blockchain
-        const task = await App.projects.projects(i)
-        const projectId = task[0].toNumber()
-        const projectContent = task[0].toNumber()
-        const taskCompleted = task[6]
+        const project = await App.projects.projects(i)
+        const projectId = project[0].toNumber()
+        const projectContent = project[0].toNumber()
+        const taskCompleted = false //project[6]
 
         const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
           return proj.id == projectId });
   
-        // Create the html for the task
+        // Create the html for the taskz
+        console.log(projectFromBulletin)
+        console.log(projectFromBulletin.title)
+
         const $projectTemplate = $taskTemplate.clone()
         $projectTemplate.find('.content').html(projectFromBulletin.title)
         $projectTemplate.find('input')
