@@ -81,7 +81,23 @@ App = {
       // Update loading state
       App.setLoading(false)
     },
-  
+    
+    fundProject : async () => {
+      App.setLoading(true)
+      let amount = document.getElementById('fund-amount').value;
+      
+      let params = (new URL(document.location)).searchParams;
+      let id = params.get("id");
+      console.log(amount)
+      console.log(id)
+      if (amount == "") {
+        alert("You must set amount.")
+      }
+
+      await App.projects.fundProject(parseInt(id), parseInt(amount), {value: amount});
+      window.location.reload()
+    },
+
     renderProjectDetails: async () => {
 
       let params = (new URL(document.location)).searchParams;
@@ -97,6 +113,9 @@ App = {
       for (var i = 0;i < projectList.length;i++) {
         if (projectList[i].hash == id) {
           let str = projectList[i].title + "\n" + projectList[i].description + "\n" + "Investment duration: " + projectList[i].investmentDuration;
+          let balance = await App.projects.getProjectBalance(id);
+          let projectGoal = await App.projects.getProjectGoal(id);
+          str += "\nBalance " +  balance + "\nGoal " + projectGoal
           p.innerText = str
         }
       }
@@ -115,6 +134,7 @@ App = {
       }
     }
   }
+  
   
   $(() => {
     $(window).load(() => {
