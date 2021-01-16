@@ -10,6 +10,7 @@ contract Projects {
     uint balance;
     uint currentMilestone;
     uint projectGoal;
+    uint lastUnclaimedMilestone;
     mapping(uint => Milestone) milestones;
     mapping(address => uint) pledgeOf;
   }
@@ -54,18 +55,15 @@ contract Projects {
   }
 
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
-    Project memory currentProject = Project(_projectHash, msg.sender, now + _investmentDuration, _numberOfMilestones, 0, 0, 0);
+    Project memory currentProject = Project(_projectHash, msg.sender, now + _investmentDuration, _numberOfMilestones, 0, 0, 0, 0);
     projects[projectCount] = currentProject;
     projectIdx[_projectHash] = projectCount;
     
-    uint _projectGoal = 0;
     for (uint i=0; i<_numberOfMilestones; i++) {
-      _projectGoal +=  _goals[i];
+      projects[projectCount].projectGoal += _goals[i];
       projects[projectCount].milestones[i].goal = _goals[i];
       projects[projectCount].milestones[i].duration = _durations[i];
     }
-
-    projects[projectCount].projectGoal = _projectGoal;
 
     projectCount++;
     emit ProjectCreated(projectCount - 1, currentProject.owner);
@@ -95,20 +93,28 @@ contract Projects {
     }
   }
 
-  function claimFunds(uint256 _projectHash) public {
-    uint projectIndex = projectIdx[_projectHash] ;
-    // mozliwe, ze tu powinno byc storage zamiast memory ( reference vs local copy)
+  function claimFunds(uint _projectHash) public {
+    uint projectIndex = projectIdx[_projectHash];
 
-    require(projects[projectIndex].balance >= projects[projectIndex].projectGoal);
     require(msg.sender == projects[projectIndex].owner);
-
+    require(projects[projectIndex].currentMilestone > projects[projectIndex].lastUnclaimedMilestone);
     uint projectBalance = projects[projectIndex].balance;
-    projects[projectIndex].balance = 0; // czy to nie jest jakies risky?
-    msg.sender.transfer(projectBalance);
+    uint claimableFunds = 0;
+    for (uint i = projects[projectIndex].lastUnclaimedMilestone;i < projects[projectIndex].currentMilestone;i++) {
+      // claim the funds proportionally to the sum of goals of the completed unclaimed milestones, if the balance is less (because of the charges)
+      // than we want to claim less than the goal of milestone
+      claimableFunds += (projects[projectIndex].milestones[i].goal * projects[projectIndex].balance) / projects[projectIndex].milestones[i].goal;
+    }
+
+    msg.sender.transfer(claimableFunds);
 
     emit FundSent(projects[projectIndex].projectHash, projects[projectIndex].balance);
   }
 
+  function voteForMilestoneCompletion(uint _projectHash, uint _milestoneIndex) public {
+    uint projectIndex = projectIdx[_projectHash];
+    
+  }
 
   function isProjectCompleted(uint _projectHash) public view returns (bool) {
     Project storage project = projects[projectIdx[_projectHash]];
