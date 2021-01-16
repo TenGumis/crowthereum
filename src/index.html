@@ -35,6 +35,9 @@
         margin-bottom: 0px;
       }
 
+      .list-group-item-info {
+        margin: 10px;
+      }  
     </style>
   </head>
   <body>
@@ -51,11 +54,11 @@
       <div class="row">
         <main role="main" class="col-lg-12 d-flex justify-content-center">
           <div id="loader" class="text-center">
-            <p class="text-center">Loading...</p>
+            <p class="text-center">Loading... (Maybe log in to MetaMask and refresh that page)</p>
           </div>
           <div id="content">
             <ul id="projectList" class="list-group">
-                
+              <li class="list-group-item list-group-item-info" >Projects to invest:</li>
               <div class="projectTemplate" class="list-group-item list-group-item-action" style="display: none">
                 <button type="button" class="list-group-item list-group-item-action">
                   <label>
@@ -64,7 +67,15 @@
                 </button>
               </div>
             </ul>
-            <ul id="completedProjectList" class="list-unstyled">
+            <ul id="completedProjectList" class="list-group">
+              <li class="list-group-item list-group-item-info">Finished projects:</li>
+              <div class="completedProjectTemplate" class="list-group-item list-group-item-action" style="display: none">
+                <button type="button" class="list-group-item list-group-item-action">
+                  <label>
+                    <span class="content">Project content goes here...</span>
+                  </label>
+                </button>
+              </div>
             </ul>
           </div>
         </main>
