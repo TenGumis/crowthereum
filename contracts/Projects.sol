@@ -58,7 +58,7 @@ contract Projects {
     
     require(projects[projectIndex].balance < projects[projectIndex].projectGoal);
     require(currentProject.investmentDeadline >= now);
-    require(msg.value == _amount);
+    //require(msg.value == _amount);
 
     if(currentProject.projectGoal < currentProject.balance + _amount) {
       uint investedAmount = currentProject.projectGoal - currentProject.balance;  
