@@ -123,19 +123,19 @@ App = {
 
     setBalance: async (projectHash) => {
       let balance = await App.projects.getProjectBalance(projectHash)
-      let balance_str = "<b>Balance:</b> " + web3.fromWei(balance)
+      let balance_str = "<b>Project Balance:</b> " + web3.fromWei(balance)
       let p = document.getElementById("project-balance")
       p.innerHTML = balance_str
     },
     setGoal: async (projectHash) => {
       let goal = await App.projects.getProjectGoal(projectHash)
-      let goal_str = "<b>Goal:</b> " + web3.fromWei(goal)
+      let goal_str = "<b>Funding Goal:</b> " + web3.fromWei(goal)
       let p = document.getElementById("project-goal")
       p.innerHTML = goal_str
     },
     setDeadline: async (projectHash) => {
       let deadline = await App.projects.getInvestmentDeadline(projectHash)
-      let deadline_str = "<b>Deadline: </b>" + new Date(deadline * 1000)
+      let deadline_str = "<b>Investing Deadline: </b>" + new Date(deadline * 1000)
       let p = document.getElementById("project-investment-deadline")
       p.innerHTML = deadline_str
     },

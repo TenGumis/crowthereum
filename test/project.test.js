@@ -133,6 +133,8 @@ contract('Projects', (accounts) => {
       err = error
     }
 
+    assert.ok(err instanceof Error)
+
     project = await this.projectsContract.projects(projectId)
     currentVoteStake = await project.currentVoteStake.toNumber()
     assert.strictEqual(currentVoteStake, 0)
@@ -172,5 +174,32 @@ contract('Projects', (accounts) => {
     project = await this.projectsContract.projects(projectId)
     const currentMilestone = await project.currentMilestone.toNumber()
     assert.strictEqual(currentMilestone, 1)
+  })
+
+
+  it('createSameProjectTwice', async () => {
+    const descriptionHash = 1237
+    const investmentDuration = 1 // Important in that test
+    const investmentAmount1 = 1000
+    const investmentAmount2 = 3000
+
+    var result
+
+    const account_one = accounts[0]
+    const account_two = accounts[1]
+
+    const goals = [investmentAmount1 + investmentAmount2];
+    const durations = [1];
+
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    projectId = await this.projectsContract.projectIdx(descriptionHash)
+
+    try {
+      result = await this.projectsContract.createProject(descriptionHash, investmentDuration + 1, goals, durations, goals.length, {from: account_one})
+    } catch (error) {
+      err = error
+    }
+    
+    assert.ok(err instanceof Error)
   })
 })
