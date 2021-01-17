@@ -38,6 +38,8 @@ contract Projects {
 
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
     require(_numberOfMilestones > 0);
+    require(projects[projectIdx[_projectHash]].projectHash != _projectHash);
+    
     Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0, 0);
     projects[projectCount] = currentProject;
     projectIdx[_projectHash] = projectCount;

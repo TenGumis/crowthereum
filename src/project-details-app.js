@@ -95,7 +95,7 @@ App = {
         return
       }
       let weiAmount =  web3.toWei(parseInt(amount))
-      await App.projects.fundProject(parseInt(id), weiAmount, {value: weiAmount});
+      await App.projects.fundProject(id, weiAmount, {value: weiAmount});
       window.location.reload()
     },
 
@@ -103,7 +103,7 @@ App = {
       App.setLoading(true)
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
-      await App.projects.claimFunds(parseInt(id));
+      await App.projects.claimFunds(id);
       window.location.reload()
     },
 
@@ -112,30 +112,30 @@ App = {
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
       let currentIndex = App.currentMilestone
-      await App.projects.voteForMilestoneCompletion(parseInt(id), parseInt(currentIndex));
+      await App.projects.voteForMilestoneCompletion(id, parseInt(currentIndex));
       window.location.reload()
     },
 
-    setDescription: async (str) => {
+    setDescription: async (descr, title) => {
       let p = document.getElementById("project-description-text")
-      p.innerText = str
+      p.innerHTML = "<b>" + title + "</b><br>\n" + descr
     },
 
     setBalance: async (projectHash) => {
       let balance = await App.projects.getProjectBalance(projectHash)
-      let balance_str = "<b>Balance:</b> " + web3.fromWei(balance)
+      let balance_str = "<b>Project Balance:</b> " + web3.fromWei(balance)
       let p = document.getElementById("project-balance")
       p.innerHTML = balance_str
     },
     setGoal: async (projectHash) => {
       let goal = await App.projects.getProjectGoal(projectHash)
-      let goal_str = "<b>Goal:</b> " + web3.fromWei(goal)
+      let goal_str = "<b>Funding Goal:</b> " + web3.fromWei(goal)
       let p = document.getElementById("project-goal")
       p.innerHTML = goal_str
     },
     setDeadline: async (projectHash) => {
-      // let deadline = await App.projects.getInvestmentDeadline(projectHash)
-      let deadline_str = "<b>Deadline: </b>" + "Do jutra xD"
+      let deadline = await App.projects.getInvestmentDeadline(projectHash)
+      let deadline_str = "<b>Investing Deadline: </b>" + new Date(deadline * 1000)
       let p = document.getElementById("project-investment-deadline")
       p.innerHTML = deadline_str
     },
@@ -147,12 +147,8 @@ App = {
       for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
         let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
         let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
-        let milestoneString = "<p><b>Goal:</b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b>| <b>Deadline:</b>" + milestoneDuration + "</p>";
-        if (currentMilestone == milestoneIndex) {
-
-        } else {
-          str += "\n" + milestoneString
-        }
+        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b> | <b>Deadline: </b>" + milestoneDuration + "</p>";
+        str += "\n" + milestoneString
       }
       div.innerHTML = str
     },
@@ -163,7 +159,7 @@ App = {
       let str = "Vote " + currentMilestone + " as completed"
       App.currentMilestone = currentMilestone
       if (currentMilestone.toNumber() == numberOfMilestones.toNumber()){
-        div.textContent = "Don't click"
+        div.parentNode.removeChild(div)
       } else {
         div.textContent = str
       }
@@ -176,7 +172,7 @@ App = {
       var projectList = bulletinBoard.projects
       for (var i = 0; i < projectList.length; i++) {
         if (projectList[i].hash == projectHash) {
-          App.setDescription(projectList[i].description)
+          App.setDescription(projectList[i].description, projectList[i].title)
           App.setBalance(projectHash)
           App.setGoal(projectHash)
           App.setDeadline(projectHash)
