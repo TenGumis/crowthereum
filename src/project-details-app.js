@@ -92,8 +92,10 @@ App = {
       console.log(id)
       if (amount == "") {
         alert("You must set amount.")
+        return
       }
       let weiAmount =  web3.toWei(parseInt(amount))
+      console.log(weiAmount)
       await App.projects.fundProject(parseInt(id), weiAmount, {value: weiAmount});
       window.location.reload()
     },
