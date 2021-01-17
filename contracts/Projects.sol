@@ -34,26 +34,6 @@ contract Projects {
   mapping(uint => Project) public projects;
   mapping(uint => uint) public projectIdx;
 
-  function getMilestoneDuration(uint _projectHash, uint milestoneIndex) public view returns (uint) {
-    uint projectIndex = projectIdx[_projectHash];
-    return projects[projectIndex].milestones[milestoneIndex].duration;
-  }
-
-  function getMilestoneGoal(uint _projectHash, uint milestoneIndex) public view returns (uint) {
-    uint projectIndex = projectIdx[_projectHash];
-    return projects[projectIndex].milestones[milestoneIndex].goal;
-  }
-
-  function getProjectBalance(uint _projectHash) public view returns (uint) {
-    uint projectIndex = projectIdx[_projectHash];
-    return projects[projectIndex].balance;
-  }
-
-  function getProjectGoal(uint _projectHash) public view returns (uint) {
-    uint projectIndex = projectIdx[_projectHash];
-    return projects[projectIndex].projectGoal;
-  }
-
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
     require(_numberOfMilestones > 0);
     Project memory currentProject = Project(_projectHash, msg.sender, now + _investmentDuration, _numberOfMilestones, 0, 0, 0, 0);
@@ -117,8 +97,35 @@ contract Projects {
     
   }
 
+  // vvvvvvvvvvvvvvvvvvvvvvvv|*****public views below*****|vvvvvvvvvvvvvvvvvvvvvvv
+
   function isProjectCompleted(uint _projectHash) public view returns (bool) {
     Project storage project = projects[projectIdx[_projectHash]];
     return (project.currentMilestone == project.numberOfMilestones);
   }
+
+  function getNumberOfMilestones(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].numberOfMilestones;
+  }
+
+  function getMilestoneDuration(uint _projectHash, uint milestoneIndex) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].milestones[milestoneIndex].duration;
+  }
+
+  function getMilestoneGoal(uint _projectHash, uint milestoneIndex) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].milestones[milestoneIndex].goal;
+  }
+
+  function getProjectBalance(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].balance;
+  }
+
+  function getProjectGoal(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].projectGoal;
+  }
+
+  function getCurrentMilestone(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].currentMilestone;
+  }
+
 }
