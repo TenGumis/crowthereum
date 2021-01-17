@@ -1,5 +1,6 @@
 App = {
     loading: false,
+    currentMilestone: -1,
     contracts: {},
   
     load: async () => {
@@ -8,6 +9,7 @@ App = {
       await App.loadBulletinBoard()
       await App.loadContract()
       await App.render()
+      await App.renderProjectDetails()
     },
   
     // https://medium.com/metamask/https-medium-com-metamask-breaking-change-injecting-web3-7722797916a8
@@ -76,7 +78,7 @@ App = {
       $('#account').html(App.account)
   
       // Render Projects
-      await App.renderProjectDetails()
+      // await App.renderProjectDetails()
   
       // Update loading state
       App.setLoading(false)
@@ -88,14 +90,11 @@ App = {
       
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
-      console.log(amount)
-      console.log(id)
       if (amount == "") {
         alert("You must set amount.")
         return
       }
       let weiAmount =  web3.toWei(parseInt(amount))
-      console.log(weiAmount)
       await App.projects.fundProject(parseInt(id), weiAmount, {value: weiAmount});
       window.location.reload()
     },
@@ -112,48 +111,77 @@ App = {
       App.setLoading(true)
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
-      let currentIndex = await App.projects.getCurrentMilestone(parseInt(id));
+      let currentIndex = App.currentMilestone
       await App.projects.voteForMilestoneCompletion(parseInt(id), parseInt(currentIndex));
       window.location.reload()
     },
 
+    setDescription: async (str) => {
+      let p = document.getElementById("project-description-text")
+      p.innerText = str
+    },
+
+    setBalance: async (projectHash) => {
+      let balance = await App.projects.getProjectBalance(projectHash)
+      let balance_str = "<b>Balance:</b> " + web3.fromWei(balance)
+      let p = document.getElementById("project-balance")
+      p.innerHTML = balance_str
+    },
+    setGoal: async (projectHash) => {
+      let goal = await App.projects.getProjectGoal(projectHash)
+      let goal_str = "<b>Goal:</b> " + web3.fromWei(goal)
+      let p = document.getElementById("project-goal")
+      p.innerHTML = goal_str
+    },
+    setDeadline: async (projectHash) => {
+      // let deadline = await App.projects.getInvestmentDeadline(projectHash)
+      let deadline_str = "<b>Deadline: </b>" + "Do jutra xD"
+      let p = document.getElementById("project-investment-deadline")
+      p.innerHTML = deadline_str
+    },
+    setMilestones: async(projectHash) => {
+      let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
+      let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
+      let div = document.getElementById("project-milestones-list")
+      var str = "<h5>MILESTONES</h5>"
+      for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
+        let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
+        let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
+        let milestoneString = "<p><b>Goal:</b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b>| <b>Deadline:</b>" + milestoneDuration + "</p>";
+        if (currentMilestone == milestoneIndex) {
+
+        } else {
+          str += "\n" + milestoneString
+        }
+      }
+      div.innerHTML = str
+    },
+    setButtons: async (projectHash) => {
+      let div = document.getElementById("project-milestone-button")
+      let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
+      let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
+      let str = "Vote " + currentMilestone + " as completed"
+      App.currentMilestone = currentMilestone
+      if (currentMilestone.toNumber() == numberOfMilestones.toNumber()){
+        div.textContent = "Don't click"
+      } else {
+        div.textContent = str
+      }
+    },
     renderProjectDetails: async () => {
-
       let params = (new URL(document.location)).searchParams;
-      let projectHash = params.get("id");
-
-      // Project id for which we need to render data
-      console.log("id:" + projectHash)
-      
-      let p = document.getElementById('project-details')
-      const investmentDeadline = await App.projects.getInvestmentDeadline(projectHash)
-      const investmentDeadlineDate = new Date(investmentDeadline * 1000); // https://ethereum.stackexchange.com/questions/32173/how-to-handle-dates-in-solidity-and-web3
-
+      let projectHash = params.get("id")
       const bulletinBoard = await $.getJSON('BulletinBoard.json')
 
       var projectList = bulletinBoard.projects
-      for (var i = 0;i < projectList.length;i++) {
+      for (var i = 0; i < projectList.length; i++) {
         if (projectList[i].hash == projectHash) {
-          let str = projectList[i].title + "\n" + projectList[i].description + "\n" +
-            "Investment duration: " + projectList[i].investmentDuration + " seconds\n" +
-            "Investment deadline: " + investmentDeadlineDate + "\n";
-          let balance = await App.projects.getProjectBalance(projectHash);
-          let projectGoal = await App.projects.getProjectGoal(projectHash);
-          str += "\nBalance " +  web3.fromWei(balance) + " ETH" + "\nGoal " + web3.fromWei(projectGoal) + " ETH"
-          let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
-          let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
-          for (var milestoneIndex = 0;milestoneIndex < numberOfMilestones;milestoneIndex++) {
-            let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
-            let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
-            let milestoneString = "Milestone no. " + milestoneIndex + " with associated cost " + web3.fromWei(milestoneGoal) + " ETH and duration " + milestoneDuration;
-
-            if (currentMilestone == milestoneIndex) {
-              str += "\n-> " + milestoneString + " <-"
-            } else {
-              str += "\n" + milestoneString
-            }
-          }
-          p.innerText = str
+          App.setDescription(projectList[i].description)
+          App.setBalance(projectHash)
+          App.setGoal(projectHash)
+          App.setDeadline(projectHash)
+          App.setMilestones(projectHash)
+          App.setButtons(projectHash)
         }
       }
     },
