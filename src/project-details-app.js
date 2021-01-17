@@ -95,7 +95,7 @@ App = {
         return
       }
       let weiAmount =  web3.toWei(parseInt(amount))
-      await App.projects.fundProject(parseInt(id), weiAmount, {value: weiAmount});
+      await App.projects.fundProject(id, weiAmount, {value: weiAmount});
       window.location.reload()
     },
 
@@ -103,7 +103,7 @@ App = {
       App.setLoading(true)
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
-      await App.projects.claimFunds(parseInt(id));
+      await App.projects.claimFunds(id);
       window.location.reload()
     },
 
@@ -112,7 +112,7 @@ App = {
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
       let currentIndex = App.currentMilestone
-      await App.projects.voteForMilestoneCompletion(parseInt(id), parseInt(currentIndex));
+      await App.projects.voteForMilestoneCompletion(id, parseInt(currentIndex));
       window.location.reload()
     },
 
