@@ -154,10 +154,10 @@ App = {
   createProject: async () => { 
     const title = $('#projectTitle').val()
     const description = $('#projectDescription').val()
-    const deadline = $('#investingDeadline').val()
+    const investingDeadline = $('#investingDeadline').val();
     const hash = solSha3(title.concat(description))
 
-    if (title == "" || description == "" || deadline == "") {
+    if (title == "" || description == "" || investingDeadline == "") {
       alert("You must specify title, description and deadline.")
       return
     }
@@ -176,7 +176,8 @@ App = {
     });
 
     App.setLoading(true)
-    await App.projects.createProject(hash, parseInt(deadline), goals, durations, milestones.length);
+    const investingDuration = parseInt(investingDeadline) * 60 * 60 *  24;
+    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length);
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
       body: JSON.stringify({
@@ -185,7 +186,7 @@ App = {
         title: title,
         description: description,
         milestones: App.getMilestonesList(),
-        investmentDuration: deadline,
+        investmentDuration: investingDuration,
         owner: App.account
       }),
       headers: {

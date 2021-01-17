@@ -109,26 +109,31 @@ App = {
     renderProjectDetails: async () => {
 
       let params = (new URL(document.location)).searchParams;
-      let id = params.get("id");
+      let projectHash = params.get("id");
 
       // Project id for which we need to render data
-      console.log("id:" + id)
+      console.log("id:" + projectHash)
       
       let p = document.getElementById('project-details')
+      const investmentDeadline = await App.projects.getInvestmentDeadline(projectHash)
+      const investmentDeadlineDate = new Date(investmentDeadline * 1000); // https://ethereum.stackexchange.com/questions/32173/how-to-handle-dates-in-solidity-and-web3
 
       const bulletinBoard = await $.getJSON('BulletinBoard.json')
+
       var projectList = bulletinBoard.projects
       for (var i = 0;i < projectList.length;i++) {
-        if (projectList[i].hash == id) {
-          let str = projectList[i].title + "\n" + projectList[i].description + "\n" + "Investment duration: " + projectList[i].investmentDuration;
-          let balance = await App.projects.getProjectBalance(id);
-          let projectGoal = await App.projects.getProjectGoal(id);
+        if (projectList[i].hash == projectHash) {
+          let str = projectList[i].title + "\n" + projectList[i].description + "\n" +
+            "Investment duration: " + projectList[i].investmentDuration + " seconds\n" +
+            "Investment deadline: " + investmentDeadlineDate + "\n";
+          let balance = await App.projects.getProjectBalance(projectHash);
+          let projectGoal = await App.projects.getProjectGoal(projectHash);
           str += "\nBalance " +  web3.fromWei(balance) + " ETH" + "\nGoal " + web3.fromWei(projectGoal) + " ETH"
-          let numberOfMilestones = await App.projects.getNumberOfMilestones(id);
-          let currentMilestone = await App.projects.getCurrentMilestone(id);
+          let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
+          let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
           for (var milestoneIndex = 0;milestoneIndex < numberOfMilestones;milestoneIndex++) {
-            let milestoneGoal = await App.projects.getMilestoneGoal(id, milestoneIndex);
-            let milestoneDuration = await App.projects.getMilestoneDuration(id, milestoneIndex);
+            let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
+            let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
             let milestoneString = "Milestone no. " + milestoneIndex + " with associated cost " + web3.fromWei(milestoneGoal) + " ETH and duration " + milestoneDuration;
 
             if (currentMilestone == milestoneIndex) {
