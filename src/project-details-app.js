@@ -116,9 +116,9 @@ App = {
       window.location.reload()
     },
 
-    setDescription: async (str) => {
+    setDescription: async (descr, title) => {
       let p = document.getElementById("project-description-text")
-      p.innerText = str
+      p.innerHTML = "<b>" + title + "</b><br>\n" + descr
     },
 
     setBalance: async (projectHash) => {
@@ -134,8 +134,8 @@ App = {
       p.innerHTML = goal_str
     },
     setDeadline: async (projectHash) => {
-      // let deadline = await App.projects.getInvestmentDeadline(projectHash)
-      let deadline_str = "<b>Deadline: </b>" + "Do jutra xD"
+      let deadline = await App.projects.getInvestmentDeadline(projectHash)
+      let deadline_str = "<b>Deadline: </b>" + new Date(deadline * 1000)
       let p = document.getElementById("project-investment-deadline")
       p.innerHTML = deadline_str
     },
@@ -172,7 +172,7 @@ App = {
       var projectList = bulletinBoard.projects
       for (var i = 0; i < projectList.length; i++) {
         if (projectList[i].hash == projectHash) {
-          App.setDescription(projectList[i].description)
+          App.setDescription(projectList[i].description, projectList[i].title)
           App.setBalance(projectHash)
           App.setGoal(projectHash)
           App.setDeadline(projectHash)
