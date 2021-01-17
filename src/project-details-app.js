@@ -98,6 +98,14 @@ App = {
       window.location.reload()
     },
 
+    claimFunds : async() => {
+      App.setLoading(true)
+      let params = (new URL(document.location)).searchParams;
+      let id = params.get("id");
+      await App.projects.claimFunds(parseInt(id));
+      window.location.reload()
+    },
+
     renderProjectDetails: async () => {
 
       let params = (new URL(document.location)).searchParams;
