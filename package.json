@@ -8,7 +8,7 @@
   },
   "scripts": {
     "dev": "json-server --watch data/BulletinBoard.json --port 3004 & lite-server",
-    "test": "echo \"Error: no test specified\" && sexit 1"
+    "test": "truffle test"
   },
   "contributors": [
     {

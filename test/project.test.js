@@ -21,53 +21,48 @@ contract('Projects', (accounts) => {
     const duration = 30 
     const investmentDuration = 30
     const amount = 1000
-    const gasCost = 20000000000
 
     var result
 
     const account_one = accounts[0]
     const account_two = accounts[1]
 
-    result = await this.projectsContract.createProject(descriptionHash, goal, duration, investmentDuration, {from: account_one})
-    projectId = result.logs[0].args.id.toNumber()
+    const goals = [goal];
+    const durations = [duration];
+
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length , {from: account_one})
+    projectId = await this.projectsContract.projectIdx(descriptionHash)
     owner = result.logs[0].args.owner
 
     assert.strictEqual(account_one, owner)
     const projectCount = await this.projectsContract.projectCount()
-    assert.strictEqual(projectId, projectCount.toNumber())
 
     // funding a project
-    result = await this.projectsContract.fundProject(projectId, amount, {from: account_two, value: amount})
+    result = await this.projectsContract.fundProject(descriptionHash, amount, {from: account_two, value: amount})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, amount)
 
-    result = await this.projectsContract.fundProject(projectId, goal-amount, {from: account_two, value: goal-amount})
+    result = await this.projectsContract.fundProject(descriptionHash, goal-amount, {from: account_two, value: goal-amount})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, goal)
-
-    // old_balance = parseInt(await web3.eth.getBalance(account_one))
-    // console.log(old_balance)
     
-    result = await this.projectsContract.claimFunds(projectId, {from: account_one})
+    result = await this.projectsContract.voteForMilestoneCompletion(descriptionHash, 0, {from: account_two});
     project = await this.projectsContract.projects(projectId)
-    projectBalance = await project.balance.toNumber()
-    assert.strictEqual(projectBalance, 0)
-    //tutaj sie jakis syf robi. Chcialbym sprawdzic czy balance wzrosl o odpowiednia sume. Nie liczac kosztu transkacji
-    // transactionCost = result.receipt.cumulativeGasUsed * gasCost
-    // new_balance = parseInt(await web3.eth.getBalance(account_one))
-    // assert.strictEqual(new_balance, old_balance+goal+transactionCost)
+    currentMilestone = await project.currentMilestone.toNumber()
+    assert.strictEqual(currentMilestone, 1)
 
-    // assert.strictEqual(amount, )
-    // cos_tam = result.logs[0].args
-    // console.log(cos_tam.amount)
-
-    // result = await this.projects.fundProject(projectId, 0.1)
+    result = await this.projectsContract.claimFunds(descriptionHash, {from: account_one})
+    project = await this.projectsContract.projects(projectId)
+    lastUnclaimedMilestone = await project.lastUnclaimedMilestone.toNumber()
+    currentMilestone = await project.currentMilestone.toNumber()
+    assert.strictEqual(lastUnclaimedMilestone, 1)
+    assert.strictEqual(lastUnclaimedMilestone, currentMilestone)
   })
 
   it('investmentDeadlineTest', async () => {
-    const descriptionHash = 123
+    const descriptionHash = 1234
     const investmentDuration = 1 // Important in that test
     const investmentAmount = 1000
 
@@ -79,10 +74,10 @@ contract('Projects', (accounts) => {
     const goals = [investmentAmount * 5];
     const durations = [1];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, 1, {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
 
-    assert.strictEqual(projectId.toNumber(), 0)
+    //assert.strictEqual(projectId.toNumber(), 0)
     // funding a project
     result = await this.projectsContract.fundProject(descriptionHash, investmentAmount, {from: account_two, value: investmentAmount})
     project = await this.projectsContract.projects(projectId)
@@ -106,5 +101,76 @@ contract('Projects', (accounts) => {
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, investmentAmount)
+  })
+
+  it('voteForMilestoneBeforeInvestmentFinishedTest', async () => {
+    const descriptionHash = 1235
+    const investmentDuration = 1 // Important in that test
+    const investmentAmount1 = 1000
+    const investmentAmount2 = 3000
+
+    var result
+
+    const account_one = accounts[0]
+    const account_two = accounts[1]
+
+    const goals = [investmentAmount1 + investmentAmount2];
+    const durations = [1];
+
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    projectId = await this.projectsContract.projectIdx(descriptionHash)
+
+    //assert.strictEqual(projectId.toNumber(), 0)
+    // funding a project
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1})
+    project = await this.projectsContract.projects(projectId)
+    projectBalance = await project.balance.toNumber()
+    assert.strictEqual(projectBalance, investmentAmount1)
+
+    try {
+      result = await this.projectsContract.voteForMilestoneCompletion(descriptionHash, 0, {from: account_two});
+    } catch (error) {
+      err = error
+    }
+
+    project = await this.projectsContract.projects(projectId)
+    currentVoteStake = await project.currentVoteStake.toNumber()
+    assert.strictEqual(currentVoteStake, 0)
+  })
+
+  it('voteForMilestoneAfterInvestmentFinishedTest', async () => {
+    const descriptionHash = 1236
+    const investmentDuration = 1 // Important in that test
+    const investmentAmount1 = 1000
+    const investmentAmount2 = 3000
+
+    var result
+
+    const account_one = accounts[0]
+    const account_two = accounts[1]
+
+    const goals = [investmentAmount1 + investmentAmount2];
+    const durations = [1];
+
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    projectId = await this.projectsContract.projectIdx(descriptionHash)
+
+    //assert.strictEqual(projectId.toNumber(), 0)
+    // funding a project
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1})
+    project = await this.projectsContract.projects(projectId)
+    projectBalance = await project.balance.toNumber()
+    assert.strictEqual(projectBalance, investmentAmount1)
+
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount2, {from: account_two, value: investmentAmount2})
+    project = await this.projectsContract.projects(projectId)
+    projectBalance = await project.balance.toNumber()
+    assert.strictEqual(projectBalance, investmentAmount1 + investmentAmount2)
+
+    result = await this.projectsContract.voteForMilestoneCompletion(descriptionHash, 0, {from: account_two});
+
+    project = await this.projectsContract.projects(projectId)
+    const currentMilestone = await project.currentMilestone.toNumber()
+    assert.strictEqual(currentMilestone, 1)
   })
 })

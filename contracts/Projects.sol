@@ -95,6 +95,7 @@ contract Projects {
 
   function voteForMilestoneCompletion(uint _projectHash, uint _milestoneIndex) public {
     uint projectIndex = projectIdx[_projectHash];
+    require(isProjectFunded(_projectHash) == true);
     require(projects[projectIndex].currentMilestone == _milestoneIndex);
     require(projects[projectIndex].milestoneToAccept[msg.sender] <= projects[projectIndex].currentMilestone);
     require(projects[projectIndex].pledgeOf[msg.sender] > 0);
@@ -141,6 +142,11 @@ contract Projects {
 
   function getInvestmentDeadline(uint _projectHash) public view returns (uint) {
     return projects[projectIdx[_projectHash]].investmentDeadline;
+  }
+
+  function isProjectFunded(uint _projectHash) public view returns (bool) {
+    Project storage project = projects[projectIdx[_projectHash]];
+    return (project.balance == project.projectGoal);
   }
 
 }
