@@ -113,16 +113,27 @@ App = {
     var li = document.createElement("li");
     var milestoneDeadline = $('#milestoneDeadline').val();
     var milestoneCost = $('#milestoneCost').val();
-    var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost));
+    var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost).concat(" ETH"));
 
     li.appendChild(t1);
+
+
     if (milestoneDeadline == "" || milestoneCost == "") {
       alert("You must specify both the deadline and cost of a milestone!");
       return;
-    } else {
-      document.getElementById("milestonesList").appendChild(li);
+    }
+    
+    if (parseInt(milestoneCost) <= 0) {
+      alert("Cost has to be greater than 0. ")
+      return;
     }
 
+    if (parseInt(milestoneDeadline) <= 0) {
+      alert("Milestone duration has to be greater than 0.")
+      return;
+    }
+
+    document.getElementById("milestonesList").appendChild(li);
     document.getElementById("milestoneDeadline").value = "";
     document.getElementById("milestoneCost").value = "";
   
@@ -158,7 +169,7 @@ App = {
       return
     }
     const goals = milestones.map( function(milestone) { 
-      return milestone.cost
+      return web3.toWei(milestone.cost)
     });
     const durations = milestones.map( function(milestone) { 
       return milestone.deadline

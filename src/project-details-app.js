@@ -123,7 +123,20 @@ App = {
           let str = projectList[i].title + "\n" + projectList[i].description + "\n" + "Investment duration: " + projectList[i].investmentDuration;
           let balance = await App.projects.getProjectBalance(id);
           let projectGoal = await App.projects.getProjectGoal(id);
-          str += "\nBalance " +  balance + "\nGoal " + projectGoal
+          str += "\nBalance " +  web3.fromWei(balance) + " ETH" + "\nGoal " + web3.fromWei(projectGoal) + " ETH"
+          let numberOfMilestones = await App.projects.getNumberOfMilestones(id);
+          let currentMilestone = await App.projects.getCurrentMilestone(id);
+          for (var milestoneIndex = 0;milestoneIndex < numberOfMilestones;milestoneIndex++) {
+            let milestoneGoal = await App.projects.getMilestoneGoal(id, milestoneIndex);
+            let milestoneDuration = await App.projects.getMilestoneDuration(id, milestoneIndex);
+            let milestoneString = "Milestone no. " + milestoneIndex + " with associated cost " + web3.fromWei(milestoneGoal) + " ETH and duration " + milestoneDuration;
+
+            if (currentMilestone == milestoneIndex) {
+              str += "\n-> " + milestoneString + " <-"
+            } else {
+              str += "\n" + milestoneString
+            }
+          }
           p.innerText = str
         }
       }
