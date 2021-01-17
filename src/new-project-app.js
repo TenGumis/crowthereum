@@ -141,7 +141,6 @@ App = {
   },
 
   createProject: async () => { 
-    App.setLoading(true)
     const title = $('#projectTitle').val()
     const description = $('#projectDescription').val()
     const deadline = $('#investingDeadline').val()
@@ -149,9 +148,15 @@ App = {
 
     if (title == "" || description == "" || deadline == "") {
       alert("You must specify title, description and deadline.")
+      return
     }
 
     const milestones = App.getMilestonesList();
+    
+    if (milestones.length == 0) {
+      alert("Project has to have non-empty list of milestones.")
+      return
+    }
     const goals = milestones.map( function(milestone) { 
       return milestone.cost
     });
@@ -159,6 +164,7 @@ App = {
       return milestone.deadline
     });
 
+    App.setLoading(true)
     await App.projects.createProject(hash, parseInt(deadline), goals, durations, milestones.length);
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
