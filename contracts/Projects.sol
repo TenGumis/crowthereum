@@ -36,7 +36,7 @@ contract Projects {
 
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
     require(_numberOfMilestones > 0);
-    Project memory currentProject = Project(_projectHash, msg.sender, now + _investmentDuration, _numberOfMilestones, 0, 0, 0, 0);
+    Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0);
     projects[projectCount] = currentProject;
     projectIdx[_projectHash] = projectCount;
     
@@ -55,7 +55,7 @@ contract Projects {
     Project memory currentProject = projects[projectIndex];
     
     require(projects[projectIndex].balance < projects[projectIndex].projectGoal);
-    //require(currentProject.investmentDeadline >= now);
+    require(currentProject.investmentDeadline >= now);
     require(msg.value == _amount);
 
     if(currentProject.projectGoal < currentProject.balance + _amount) {
@@ -126,6 +126,10 @@ contract Projects {
 
   function getCurrentMilestone(uint _projectHash) public view returns (uint) {
     return projects[projectIdx[_projectHash]].currentMilestone;
+  }
+
+  function getInvestmentDeadline(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].investmentDeadline;
   }
 
 }
