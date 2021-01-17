@@ -148,11 +148,7 @@ App = {
         let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
         let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
         let milestoneString = "<p><b>Goal:</b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b>| <b>Deadline:</b>" + milestoneDuration + "</p>";
-        if (currentMilestone == milestoneIndex) {
-
-        } else {
-          str += "\n" + milestoneString
-        }
+        str += "\n" + milestoneString
       }
       div.innerHTML = str
     },
@@ -163,7 +159,7 @@ App = {
       let str = "Vote " + currentMilestone + " as completed"
       App.currentMilestone = currentMilestone
       if (currentMilestone.toNumber() == numberOfMilestones.toNumber()){
-        div.textContent = "Don't click"
+        div.parentNode.removeChild(div)
       } else {
         div.textContent = str
       }
