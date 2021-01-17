@@ -113,7 +113,7 @@ App = {
     var li = document.createElement("li");
     var milestoneDeadline = $('#milestoneDeadline').val();
     var milestoneCost = $('#milestoneCost').val();
-    var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost).concat(" ETH"));
+    var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost));
 
     li.appendChild(t1);
 
@@ -122,7 +122,7 @@ App = {
       alert("You must specify both the deadline and cost of a milestone!");
       return;
     }
-    
+
     if (parseInt(milestoneCost) <= 0) {
       alert("Cost has to be greater than 0. ")
       return;
@@ -163,7 +163,7 @@ App = {
     }
 
     const milestones = App.getMilestonesList();
-    
+    console.log(milestones)
     if (milestones.length == 0) {
       alert("Project has to have non-empty list of milestones.")
       return
@@ -171,6 +171,7 @@ App = {
     const goals = milestones.map( function(milestone) { 
       return web3.toWei(milestone.cost)
     });
+    console.log(goals)
     const durations = milestones.map( function(milestone) { 
       return milestone.deadline
     });

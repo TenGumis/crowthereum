@@ -93,6 +93,8 @@ App = {
         // Fetch the task data from the blockchain
         const project = await App.projects.projects(i)
         const projectHash = project[0].toNumber()
+        console.log(projectHash)
+        console.log(project[0])
         const projectContent = project[0].toNumber()
         const isProjectCompleted = await App.projects.isProjectCompleted(projectHash)
 

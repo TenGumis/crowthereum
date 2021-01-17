@@ -92,9 +92,11 @@ App = {
       console.log(id)
       if (amount == "") {
         alert("You must set amount.")
+        return
       }
-
-      await App.projects.fundProject(parseInt(id), parseInt(amount), {value: amount});
+      let weiAmount =  web3.toWei(parseInt(amount))
+      console.log(weiAmount)
+      await App.projects.fundProject(parseInt(id), weiAmount, {value: weiAmount});
       window.location.reload()
     },
 
@@ -103,6 +105,15 @@ App = {
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
       await App.projects.claimFunds(parseInt(id));
+      window.location.reload()
+    },
+
+    voteForCompletion : async() => {
+      App.setLoading(true)
+      let params = (new URL(document.location)).searchParams;
+      let id = params.get("id");
+      let currentIndex = await App.projects.getCurrentMilestone(parseInt(id));
+      await App.projects.voteForMilestoneCompletion(parseInt(id), parseInt(currentIndex));
       window.location.reload()
     },
 
