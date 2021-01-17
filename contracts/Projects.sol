@@ -11,8 +11,10 @@ contract Projects {
     uint currentMilestone;
     uint projectGoal;
     uint lastUnclaimedMilestone;
+    uint currentVoteStrength;
     mapping(uint => Milestone) milestones;
     mapping(address => uint) pledgeOf;
+    mapping(address => bool) currentVote;
   }
 
   struct Milestone {
@@ -36,7 +38,7 @@ contract Projects {
 
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
     require(_numberOfMilestones > 0);
-    Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0);
+    Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0, 0);
     projects[projectCount] = currentProject;
     projectIdx[_projectHash] = projectCount;
     
@@ -94,7 +96,16 @@ contract Projects {
 
   function voteForMilestoneCompletion(uint _projectHash, uint _milestoneIndex) public {
     uint projectIndex = projectIdx[_projectHash];
-    
+    require(projects[projectIndex].currentMilestone == _milestoneIndex);
+    require(projects[projectIndex].currentVote[msg.sender] == false);
+    require(projects[projectIndex].pledgeOf[msg.sender] > 0);
+    projects[projectIndex].currentVote[msg.sender] = true;
+    projects[projectIndex].currentVoteStrength += projects[projectIndex].pledgeOf[msg.sender];
+    if (projects[projectIndex].currentVoteStrength > projects[projectIndex].projectGoal / 10 * 9) {
+      projects[projectIndex].currentVote[msg.sender] = false;
+      projects[projectIndex].currentVoteStrength = 0;
+      projects[projectIndex].currentMilestone++;
+    }
   }
 
   // vvvvvvvvvvvvvvvvvvvvvvvv|*****public views below*****|vvvvvvvvvvvvvvvvvvvvvvv
