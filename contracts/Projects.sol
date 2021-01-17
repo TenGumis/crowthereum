@@ -100,7 +100,7 @@ contract Projects {
     require(projects[projectIndex].milestoneToAccept[msg.sender] <= projects[projectIndex].currentMilestone);
     require(projects[projectIndex].pledgeOf[msg.sender] > 0);
 
-    projects[projectIndex].milestoneToAccept[msg.sender] = projects[projectIndex].currentMilestone;
+    projects[projectIndex].milestoneToAccept[msg.sender] = projects[projectIndex].currentMilestone + 1;
     projects[projectIndex].currentVoteStake += projects[projectIndex].pledgeOf[msg.sender];
 
     if (projects[projectIndex].currentVoteStake > projects[projectIndex].projectGoal / 10 * 9) {
