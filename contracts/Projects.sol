@@ -20,6 +20,7 @@ contract Projects {
   struct Milestone {
     uint goal;
     uint duration;
+    uint deadline;
   }
 
   event ProjectCreated(
@@ -48,6 +49,7 @@ contract Projects {
       projects[projectCount].projectGoal += _goals[i];
       projects[projectCount].milestones[i].goal = _goals[i];
       projects[projectCount].milestones[i].duration = _durations[i];
+      projects[projectCount].milestones[i].deadline = 0;
     }
 
     projectCount++;
@@ -62,20 +64,26 @@ contract Projects {
     require(currentProject.investmentDeadline >= now);
     require(msg.value == _amount);
 
-    if(currentProject.projectGoal < currentProject.balance + _amount) {
-      uint investedAmount = currentProject.projectGoal - currentProject.balance;  
-      uint excessValue = _amount - investedAmount;
+    uint investedAmount = 0;
+    uint excessValue = 0;
 
-      projects[projectIndex].pledgeOf[msg.sender] += investedAmount;
-      projects[projectIndex].balance += investedAmount;
+    if(currentProject.projectGoal <= currentProject.balance + _amount) {
+      investedAmount = currentProject.projectGoal - currentProject.balance;  
+      excessValue = _amount - investedAmount;
 
-      msg.sender.transfer(excessValue);
-      emit FundSent(currentProject.projectHash, investedAmount);
+      projects[projectIndex].milestones[0].deadline = now + (projects[projectIndex].milestones[0].deadline * 1 seconds);
+      
     } else {
-      projects[projectIndex].pledgeOf[msg.sender] += _amount;
-      projects[projectIndex].balance += _amount;
-      emit FundSent(currentProject.projectHash, _amount);
+      investedAmount = _amount;
     }
+
+    projects[projectIndex].pledgeOf[msg.sender] += investedAmount;
+    projects[projectIndex].balance += investedAmount;
+
+    if (excessValue > 0) {
+      msg.sender.transfer(excessValue);
+    }
+    emit FundSent(currentProject.projectHash, investedAmount);
   }
 
   function claimFunds(uint _projectHash) public {
@@ -83,7 +91,6 @@ contract Projects {
 
     require(msg.sender == projects[projectIndex].owner);
     require(projects[projectIndex].currentMilestone > projects[projectIndex].lastUnclaimedMilestone);
-    uint projectBalance = projects[projectIndex].balance;
     uint claimableFunds = 0;
     for (uint i = projects[projectIndex].lastUnclaimedMilestone;i < projects[projectIndex].currentMilestone;i++) {
       claimableFunds += projects[projectIndex].milestones[i].goal;
@@ -95,19 +102,52 @@ contract Projects {
     emit FundSent(projects[projectIndex].projectHash, projects[projectIndex].balance);
   }
 
+  function reclaimInvestment(uint _projectHash) public {
+    uint projectIndex = projectIdx[_projectHash];
+    require(projects[projectIndex].pledgeOf[msg.sender] > 0);
+    uint currentMilestone = projects[projectIndex].currentMilestone;
+    uint numberOfMilestones = projects[projectIndex].numberOfMilestones;
+    require(currentMilestone < numberOfMilestones);
+    
+    uint amountToReturn = 0;
+
+    if(isProjectFunded(_projectHash)) {
+      require(projects[projectIndex].milestones[currentMilestone].deadline < now);
+
+      amountToReturn = 0;
+      for (uint i = currentMilestone; i < projects[projectIndex].numberOfMilestones; i++) {
+        amountToReturn += projects[projectIndex].milestones[i].goal;
+      }
+      amountToReturn = (amountToReturn * projects[projectIndex].pledgeOf[msg.sender]) / projects[projectIndex].projectGoal;
+
+    } else {
+
+      require(projects[projectIndex].investmentDeadline < now);
+      amountToReturn = projects[projectIndex].pledgeOf[msg.sender];
+    }
+
+    projects[projectIndex].pledgeOf[msg.sender] = 0;
+    msg.sender.transfer(amountToReturn);
+    emit FundSent(projects[projectIndex].projectHash, amountToReturn);
+  }
+
   function voteForMilestoneCompletion(uint _projectHash, uint _milestoneIndex) public {
     uint projectIndex = projectIdx[_projectHash];
+    Project storage currentProject = projects[projectIndex];
     require(isProjectFunded(_projectHash) == true);
-    require(projects[projectIndex].currentMilestone == _milestoneIndex);
-    require(projects[projectIndex].milestoneToAccept[msg.sender] <= projects[projectIndex].currentMilestone);
-    require(projects[projectIndex].pledgeOf[msg.sender] > 0);
+    require(currentProject.currentMilestone == _milestoneIndex);
+    require(currentProject.milestoneToAccept[msg.sender] <= currentProject.currentMilestone);
+    require(currentProject.pledgeOf[msg.sender] > 0);
+    require(currentProject.milestones[currentProject.currentMilestone].deadline >= now);
 
-    projects[projectIndex].milestoneToAccept[msg.sender] = projects[projectIndex].currentMilestone + 1;
-    projects[projectIndex].currentVoteStake += projects[projectIndex].pledgeOf[msg.sender];
+    projects[projectIndex].milestoneToAccept[msg.sender] = currentProject.currentMilestone + 1;
+    projects[projectIndex].currentVoteStake += currentProject.pledgeOf[msg.sender];
 
-    if (projects[projectIndex].currentVoteStake > projects[projectIndex].projectGoal / 10 * 9) {
+    if (currentProject.currentVoteStake > currentProject.projectGoal / 10 * 9) {
       projects[projectIndex].currentVoteStake = 0;
       projects[projectIndex].currentMilestone++;
+      uint nextMilestone = projects[projectIndex].currentMilestone;
+      projects[projectIndex].milestones[nextMilestone].deadline = now + (currentProject.milestones[nextMilestone].duration * 1 seconds);
     }
   }
 
@@ -124,6 +164,10 @@ contract Projects {
 
   function getMilestoneDuration(uint _projectHash, uint milestoneIndex) public view returns (uint) {
     return projects[projectIdx[_projectHash]].milestones[milestoneIndex].duration;
+  }
+
+  function getMilestoneDeadline(uint _projectHash, uint milestoneIndex) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].milestones[milestoneIndex].deadline;
   }
 
   function getMilestoneGoal(uint _projectHash, uint milestoneIndex) public view returns (uint) {
