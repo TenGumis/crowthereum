@@ -86,8 +86,9 @@ contract Projects {
     for (uint i = projects[projectIndex].lastUnclaimedMilestone;i < projects[projectIndex].currentMilestone;i++) {
       // claim the funds proportionally to the sum of goals of the completed unclaimed milestones, if the balance is less (because of the charges)
       // than we want to claim less than the goal of milestone
-      claimableFunds += (projects[projectIndex].milestones[i].goal * projects[projectIndex].balance) / projects[projectIndex].milestones[i].goal;
+      claimableFunds += (projects[projectIndex].balance * projects[projectIndex].milestones[i].goal / projects[projectIndex].projectGoal);
     }
+    projects[projectIndex].lastUnclaimedMilestone = projects[projectIndex].currentMilestone;
 
     msg.sender.transfer(claimableFunds);
 
