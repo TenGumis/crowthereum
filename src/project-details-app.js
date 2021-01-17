@@ -147,7 +147,7 @@ App = {
       for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
         let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
         let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
-        let milestoneString = "<p><b>Goal:</b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b>| <b>Deadline:</b>" + milestoneDuration + "</p>";
+        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b> | <b>Deadline: </b>" + milestoneDuration + "</p>";
         str += "\n" + milestoneString
       }
       div.innerHTML = str
