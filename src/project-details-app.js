@@ -94,7 +94,7 @@ App = {
         alert("You must set amount.")
         return
       }
-      let weiAmount =  web3.toWei(parseInt(amount))
+      let weiAmount =  web3.toWei(parseFloat(amount))
       await App.projects.fundProject(id, weiAmount, {value: weiAmount});
       window.location.reload()
     },
@@ -134,7 +134,7 @@ App = {
         if (completed) {
           str = "<b>Project is completed.</b>"
         } else {
-          str = "<b>Project is being completed.</b>"
+          str = "<b>Project is started.</b><br><b>Current milestone: " + currentMilestone + "</b>"
         }
       } else {
         str = "<b>Project is not yet funded.</b>"
@@ -169,6 +169,7 @@ App = {
 
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
+      let isProjectFunded = await App.projects.isProjectFunded(projectHash)
       for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
         let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
         let milestoneDuration = (await App.projects.getMilestoneDuration(projectHash, milestoneIndex)) / (60 * 60 *  24);
@@ -182,11 +183,13 @@ App = {
         const $newMilestoneTemplate = $milestoneTemplate.clone()
         $newMilestoneTemplate.find('.content').html(milestoneString)
         console.log(currentMilestone.toNumber()===0)
-        if (milestoneIndex === currentMilestone.toNumber()) {
-          $newMilestoneTemplate.addClass('milestone-element-active')
+        if(isProjectFunded) {
+          if (milestoneIndex === currentMilestone.toNumber()) {
+            $newMilestoneTemplate.addClass('milestone-element-active')
 
-        } else if (milestoneIndex < currentMilestone.toNumber()) {
-          $newMilestoneTemplate.addClass('milestone-element-completed')
+          } else if (milestoneIndex < currentMilestone.toNumber()) {
+            $newMilestoneTemplate.addClass('milestone-element-completed')
+          }
         }
         $('#milestonesList').append($newMilestoneTemplate)
         $newMilestoneTemplate.show()
@@ -194,17 +197,24 @@ App = {
     },
 
     setButtons: async (projectHash) => {
-      let div = document.getElementById("project-milestone-button")
+      let div1 = document.getElementById("project-milestone-button")
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
       let str = "Vote " + currentMilestone + " as completed"
       App.currentMilestone = currentMilestone
-      if (currentMilestone.toNumber() == numberOfMilestones.toNumber()){
-        div.parentNode.removeChild(div)
+      if (currentMilestone.toNumber() === numberOfMilestones.toNumber()){
+        div1.parentNode.removeChild(div1)
       } else {
-        div.textContent = str
+        div1.textContent = str
+      }
+
+      let div2 = document.getElementById("claim-funds-button")
+      let isProjectCompleted = await App.projects.isProjectCompleted(projectHash)
+      if (isProjectCompleted === false) {
+        div2.parentNode.removeChild(div2)
       }
     },
+
     renderProjectDetails: async () => {
       let params = (new URL(document.location)).searchParams;
       let projectHash = params.get("id")
