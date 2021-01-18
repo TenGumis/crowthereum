@@ -112,6 +112,7 @@ App = {
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
       let currentIndex = App.currentMilestone
+      console.log(id, parseInt(currentIndex))
       await App.projects.voteForMilestoneCompletion(id, parseInt(currentIndex));
       window.location.reload()
     },
@@ -123,35 +124,54 @@ App = {
 
     setBalance: async (projectHash) => {
       let balance = await App.projects.getProjectBalance(projectHash)
-      let balance_str = "<b>Project Balance:</b> " + web3.fromWei(balance)
+      let balance_str = "<b>Project Balance:</b> " + web3.fromWei(balance) + " ETH"
       let p = document.getElementById("project-balance")
       p.innerHTML = balance_str
     },
+    
     setGoal: async (projectHash) => {
       let goal = await App.projects.getProjectGoal(projectHash)
-      let goal_str = "<b>Funding Goal:</b> " + web3.fromWei(goal)
+      let goal_str = "<b>Funding Goal:</b> " + web3.fromWei(goal) + " ETH"
       let p = document.getElementById("project-goal")
       p.innerHTML = goal_str
     },
+
     setDeadline: async (projectHash) => {
       let deadline = await App.projects.getInvestmentDeadline(projectHash)
-      let deadline_str = "<b>Investing Deadline: </b>" + new Date(deadline * 1000)
+      let deadline_str = "<b>Investing Deadline: </b>" + new Date(deadline * 1000).toUTCString()
       let p = document.getElementById("project-investment-deadline")
       p.innerHTML = deadline_str
     },
+
     setMilestones: async(projectHash) => {
+      const $milestoneTemplate = $('.milestoneTemplate')
+
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
-      let div = document.getElementById("project-milestones-list")
-      var str = "<h5>MILESTONES</h5>"
       for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
         let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
-        let milestoneDuration = await App.projects.getMilestoneDuration(projectHash, milestoneIndex);
-        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + "<b> ETH</b> | <b>Deadline: </b>" + milestoneDuration + "</p>";
-        str += "\n" + milestoneString
+        let milestoneDuration = (await App.projects.getMilestoneDuration(projectHash, milestoneIndex)) / (60 * 60 *  24);
+        let milestoneDeadline = await App.projects.getMilestoneDeadline(projectHash, milestoneIndex);
+        let deadline = " <b> Deadline: </b> " + new Date (milestoneDeadline.toNumber() * 1000).toUTCString()
+        if (milestoneDeadline.toNumber() === 0) {
+          deadline = " Milestone not yet started, "
+        }
+        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + " ETH</br><b> Duration: </b> " + milestoneDuration + " days</br>" + deadline + "</p>";
+
+        const $newMilestoneTemplate = $milestoneTemplate.clone()
+        $newMilestoneTemplate.find('.content').html(milestoneString)
+        console.log(currentMilestone.toNumber()===0)
+        if (milestoneIndex === currentMilestone.toNumber()) {
+          $newMilestoneTemplate.addClass('milestone-element-active')
+
+        } else if (milestoneIndex < currentMilestone.toNumber()) {
+          $newMilestoneTemplate.addClass('milestone-element-completed')
+        }
+        $('#milestonesList').append($newMilestoneTemplate)
+        $newMilestoneTemplate.show()
       }
-      div.innerHTML = str
     },
+
     setButtons: async (projectHash) => {
       let div = document.getElementById("project-milestone-button")
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
@@ -167,19 +187,18 @@ App = {
     renderProjectDetails: async () => {
       let params = (new URL(document.location)).searchParams;
       let projectHash = params.get("id")
-      const bulletinBoard = await $.getJSON('BulletinBoard.json')
 
-      var projectList = bulletinBoard.projects
-      for (var i = 0; i < projectList.length; i++) {
-        if (projectList[i].hash == projectHash) {
-          App.setDescription(projectList[i].description, projectList[i].title)
-          App.setBalance(projectHash)
-          App.setGoal(projectHash)
-          App.setDeadline(projectHash)
-          App.setMilestones(projectHash)
-          App.setButtons(projectHash)
-        }
-      }
+      const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
+        return proj.id == projectHash 
+      });
+
+      App.setDescription(projectFromBulletin.description, projectFromBulletin.title)
+      App.setBalance(projectHash)
+      App.setGoal(projectHash)
+      App.setDeadline(projectHash)
+      App.setMilestones(projectHash)
+      App.setButtons(projectHash)
+      
     },
   
     setLoading: (boolean) => {

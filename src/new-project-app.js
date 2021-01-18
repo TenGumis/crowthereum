@@ -173,8 +173,9 @@ App = {
     });
     console.log(goals)
     const durations = milestones.map( function(milestone) { 
-      return milestone.deadline
+      return milestone.duration * 60 * 60 *  24;
     });
+    console.log(durations)
 
     App.setLoading(true)
     const investingDuration = parseInt(investingDeadline) * 60 * 60 *  24;
