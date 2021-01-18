@@ -150,11 +150,18 @@ App = {
       }
     }
   },
+  getMinimumInvestment(goals, percentage) {
+    const totalProjectGoal = goals.reduce( function (a,b){
+      return parseInt(a)+parseInt(b)
+    })
+    return totalProjectGoal * parseFloat(percentage) / 100
+  },
 
   createProject: async () => { 
     const title = $('#projectTitle').val()
     const description = $('#projectDescription').val()
     const investingDeadline = $('#investingDeadline').val();
+    const minimumInvestmentAsPercentage = $('#minimumInvestmentAsPercentage').val();
     const hash = solSha3(title.concat(description))
 
     if (title == "" || description == "" || investingDeadline == "") {
@@ -163,7 +170,6 @@ App = {
     }
 
     const milestones = App.getMilestonesList();
-    console.log(milestones)
     if (milestones.length == 0) {
       alert("Project has to have a non-empty list of milestones.")
       return
@@ -171,15 +177,16 @@ App = {
     const goals = milestones.map( function(milestone) { 
       return web3.toWei(milestone.cost)
     });
-    console.log(goals)
     const durations = milestones.map( function(milestone) { 
       return milestone.duration * 60 * 60 *  24;
     });
-    console.log(durations)
+    
+    const minimumInvestment = App.getMinimumInvestment(goals, minimumInvestmentAsPercentage)
 
     App.setLoading(true)
     const investingDuration = parseInt(parseFloat(investingDeadline) * 60 * 60 *  24);
     // First add to .json, so that we have the guarantee that if a project is on blockchain then we have its description in our database
+    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length, minimumInvestment);
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
       body: JSON.stringify({

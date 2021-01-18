@@ -94,7 +94,7 @@ App = {
         alert("You must set amount.")
         return
       }
-      let weiAmount =  web3.toWei(parseInt(amount))
+      let weiAmount =  web3.toWei(parseFloat(amount))
       await App.projects.fundProject(id, weiAmount, {value: weiAmount});
       window.location.reload()
     },
@@ -192,6 +192,12 @@ App = {
         $newMilestoneTemplate.show()
       }
     },
+    setMinimumInvestment: async (projectHash) => {
+      let minimumInvestment = await App.projects.getMinimumInvestment(projectHash)
+      let minimumInvestment_str = "<b>Minimum Investment: </b> " + web3.fromWei(minimumInvestment) + " ETH"
+      let p = document.getElementById("project-minimum-investment")
+      p.innerHTML = minimumInvestment_str
+    },
 
     setButtons: async (projectHash) => {
       let div = document.getElementById("project-milestone-button")
@@ -219,6 +225,7 @@ App = {
       App.setGoal(projectHash)
       App.setDeadline(projectHash)
       App.setMilestones(projectHash)
+      App.setMinimumInvestment(projectHash)
       App.setButtons(projectHash)
       
     },
