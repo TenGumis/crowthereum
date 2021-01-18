@@ -190,9 +190,40 @@ contract Projects {
     return projects[projectIdx[_projectHash]].investmentDeadline;
   }
 
+  function getProjectOwner(uint _projectHash) public view returns (address) {
+    return projects[projectIdx[_projectHash]].owner;
+  }
+
+  function isProjectInvestor(uint _projectHash, address _account) public view returns (bool) {
+    return (projects[projectIdx[_projectHash]].pledgeOf[_account] > 0);
+  }
+
   function isProjectFunded(uint _projectHash) public view returns (bool) {
     Project storage project = projects[projectIdx[_projectHash]];
     return (project.balance == project.projectGoal);
   }
 
+  function isProjectExpired(uint _projectHash) public view returns (bool) {
+    Project storage project = projects[projectIdx[_projectHash]];
+    if (isProjectFunded(_projectHash)) {
+      if (isProjectCompleted(_projectHash)) {
+        return false;
+      } else {
+        return project.milestones[project.currentMilestone].deadline < now;
+      }
+    } else {
+      return (project.investmentDeadline < now);
+    }
+  }
+
+  function profitToClaim(uint _projectHash) public view returns (uint) {
+    uint projectIndex = projectIdx[_projectHash];
+    require(msg.sender == projects[projectIndex].owner);
+    uint claimableFunds = 0;
+    for (uint i = projects[projectIndex].lastUnclaimedMilestone;i < projects[projectIndex].currentMilestone;i++) {
+      claimableFunds += projects[projectIndex].milestones[i].goal;
+    }
+
+    return claimableFunds;
+  }
 }

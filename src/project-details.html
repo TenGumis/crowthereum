@@ -195,7 +195,7 @@
 
             <div class="col-md-7">
               <div id="project-milestones-list" class="project-info-box">
-                <h5>MILESTONES</h5>
+                <h5>MILESTONES:</h5>
                 <ul id="milestonesList" class="list-group">
                  <div class="milestone-element milestoneTemplate" style="display: none">
                     <p class="content" >Project content goes here...</p>
@@ -206,8 +206,14 @@
 
             <div clas="col-md-7">
               <div class="project-info-box">
-                <span id="claim-funds-button" onclick="App.claimFunds()" class="btn btn-success">Claim Funds</span>
+                <h5>ACTIONS:</h5>
+                <span id="claim-funds-button" onclick="App.claimFunds()" class="btn btn-success"></span>
+                <br id="claim-funds-elem1">
+                <p id="claim-funds-elem2"> </p>
                 <span id="project-milestone-button" onclick="App.voteForCompletion()" class="btn btn-success"></span>
+                <br id="milestone-elem1">
+                <p id="milestone-elem2"> </p>
+                <span id="reclaim-investment-button" onclick="App.reclaimInvestment()" class="btn btn-success">Reclaim Investment</span>
               </div>
             </div>
         </div>

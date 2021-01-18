@@ -107,6 +107,14 @@ App = {
       window.location.reload()
     },
 
+    reclaimInvestment : async() => {
+      App.setLoading(true)
+      let params = (new URL(document.location)).searchParams;
+      let id = params.get("id");
+      await App.projects.reclaimInvestment(id);
+      window.location.reload()
+    },
+
     voteForCompletion : async() => {
       App.setLoading(true)
       let params = (new URL(document.location)).searchParams;
@@ -197,21 +205,70 @@ App = {
     },
 
     setButtons: async (projectHash) => {
-      let div1 = document.getElementById("project-milestone-button")
+      
+
+      App.setMilestoneButton(projectHash);
+      App.setClaimFundsButton(projectHash);
+      App.setReclaimInvestmentButton(projectHash);
+    },
+
+    setMilestoneButton: async (projectHash) => {
+      let div = document.getElementById("project-milestone-button")
+      let isProjectInvestor = await App.projects.isProjectInvestor(projectHash, App.account)
+
+      console.log(isProjectInvestor)
+      if (isProjectInvestor === false) {
+        div.parentNode.removeChild(document.getElementById("milestone-elem1"))
+        div.parentNode.removeChild(document.getElementById("milestone-elem2"))
+        div.parentNode.removeChild(div)
+        return
+      }
+
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
       let str = "Vote " + currentMilestone + " as completed"
       App.currentMilestone = currentMilestone
       if (currentMilestone.toNumber() === numberOfMilestones.toNumber()){
-        div1.parentNode.removeChild(div1)
+        div.parentNode.removeChild(document.getElementById("milestone-elem1"))
+        div.parentNode.removeChild(document.getElementById("milestone-elem2"))
+        div.parentNode.removeChild(div)
       } else {
-        div1.textContent = str
+        div.textContent = str
+      }
+    },
+
+    setClaimFundsButton: async (projectHash) => {
+      let div = document.getElementById("claim-funds-button")
+      let projectOwner = await App.projects.getProjectOwner(projectHash)
+
+      if (App.account !== projectOwner) {
+        div.parentNode.removeChild(document.getElementById("claim-funds-elem1"))
+        div.parentNode.removeChild(document.getElementById("claim-funds-elem2"))
+        div.parentNode.removeChild(div)
+        return
       }
 
-      let div2 = document.getElementById("claim-funds-button")
-      let isProjectCompleted = await App.projects.isProjectCompleted(projectHash)
-      if (isProjectCompleted === false) {
-        div2.parentNode.removeChild(div2)
+      let profitToClaim = await App.projects.profitToClaim(projectHash)
+      let str = "Claim Funds: " + web3.fromWei(profitToClaim) + " ETH"
+      console.log(str)
+      if (profitToClaim.toNumber() === 0){
+        div.parentNode.removeChild(document.getElementById("claim-funds-elem1"))
+        div.parentNode.removeChild(document.getElementById("claim-funds-elem2"))
+        div.parentNode.removeChild(div)
+      } else {
+        div.textContent = str
+      }
+    },
+
+    setReclaimInvestmentButton: async (projectHash) => {
+      let div = document.getElementById("reclaim-investment-button")
+      let isProjectInvestor = await App.projects.isProjectInvestor(projectHash, App.account)
+      let isProjectExpired = await App.projects.isProjectExpired(projectHash)
+
+      console.log(isProjectInvestor)
+      if (isProjectInvestor === false || isProjectExpired === false) {
+        div.parentNode.removeChild(div)
+        return
       }
     },
 
