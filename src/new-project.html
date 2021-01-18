@@ -35,6 +35,11 @@
         margin-bottom: 0px;
       }
 
+      .margin-box {
+        margin-top: 15px;
+        margin-bottom: 15px;
+      }
+
     </style>
   </head>
   <body>
@@ -46,6 +51,7 @@
         </li>
       </ul>
     </nav>
+
     <div class="container-fluid">
       <div class="row" style="width:800px; margin:0 auto;[B]padding:20px 0;">
         <main role="main" class="col-lg-12 d-flex justify-content-center">
@@ -55,13 +61,13 @@
           <span>
             <div id="form" class="header">
               <form>
-                <input id="projectTitle" type="text" class="form-control" placeholder="Add project title" required>
-                <input id="projectDescription" type="text" class="form-control" placeholder="Add project description" required>
-                <input id="investingDeadline" type="number" class="form-control" placeholder="Add investing duration (in days)" required>
+                <input id="projectTitle" type="text" class="form-control margin-box" placeholder="Project title" required>
+                <textarea id="projectDescription" type="text" class="form-control margin-box" placeholder="Project description" required rows="5"></textarea>
+                <input id="investingDeadline" type="number" class="form-control margin-box" placeholder="Investing duration (in days)" required>
                 <hr class="dashed">
-                <input id="milestoneDeadline" type="number" class="form-control" placeholder="Milestone Duration (in days)" required>
-                <input id="milestoneCost" type="number" class="form-control" placeholder="Milestone Cost (in ETH)" required>
-                <span onclick="App.addMilestone()" class="btn btn-primary justify-content-center">Add Milestone</span>
+                <input id="milestoneDeadline" type="number" class="form-control margin-box" placeholder="Milestone Duration (in days)" required>
+                <input id="milestoneCost" type="number" class="form-control margin-box" placeholder="Milestone Cost (in ETH)" required>
+                <span onclick="App.addMilestone()" class="btn btn-primary justify-content-center margin-box">Add Milestone</span>
               </form>
             </div>
           </span>

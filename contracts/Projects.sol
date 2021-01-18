@@ -71,7 +71,7 @@ contract Projects {
       investedAmount = currentProject.projectGoal - currentProject.balance;  
       excessValue = _amount - investedAmount;
 
-      projects[projectIndex].milestones[0].deadline = now + (projects[projectIndex].milestones[0].deadline * 1 seconds);
+      projects[projectIndex].milestones[0].deadline = now + (projects[projectIndex].milestones[0].duration * 1 seconds);
       
     } else {
       investedAmount = _amount;
