@@ -122,6 +122,27 @@ App = {
       p.innerHTML = "<b>" + title + "</b><br>\n" + descr
     },
 
+    setProjectStatus: async (projectHash) => {
+      let completed = await App.projects.isProjectCompleted(projectHash)
+      let funded = await App.projects.isProjectFunded(projectHash)
+      let balance = await App.projects.getProjectBalance(projectHash)
+      let goal = await App.projects.getProjectGoal(projectHash)
+      let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
+      let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
+      let str = ""
+      if (funded) {
+        if (completed) {
+          str = "<b>Project is completed.</b>"
+        } else {
+          str = "<b>Project is being completed.</b>"
+        }
+      } else {
+        str = "<b>Project is not yet funded.</b>"
+      }
+      let p = document.getElementById("project-status")
+      p.innerHTML = str
+    },
+
     setBalance: async (projectHash) => {
       let balance = await App.projects.getProjectBalance(projectHash)
       let balance_str = "<b>Project Balance:</b> " + web3.fromWei(balance) + " ETH"
@@ -193,6 +214,7 @@ App = {
       });
 
       App.setDescription(projectFromBulletin.description, projectFromBulletin.title)
+      App.setProjectStatus(projectHash)
       App.setBalance(projectHash)
       App.setGoal(projectHash)
       App.setDeadline(projectHash)
