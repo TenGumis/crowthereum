@@ -123,12 +123,12 @@ App = {
       return;
     }
 
-    if (parseInt(milestoneCost) <= 0) {
+    if (parseFloat(milestoneCost) <= 0) {
       alert("Cost has to be greater than 0. ")
       return;
     }
 
-    if (parseInt(milestoneDeadline) <= 0) {
+    if (parseFloat(milestoneDeadline) <= 0) {
       alert("Milestone duration has to be greater than 0.")
       return;
     }
@@ -165,7 +165,7 @@ App = {
     const milestones = App.getMilestonesList();
     console.log(milestones)
     if (milestones.length == 0) {
-      alert("Project has to have non-empty list of milestones.")
+      alert("Project has to have a non-empty list of milestones.")
       return
     }
     const goals = milestones.map( function(milestone) { 
@@ -178,8 +178,8 @@ App = {
     console.log(durations)
 
     App.setLoading(true)
-    const investingDuration = parseInt(investingDeadline) * 60 * 60 *  24;
-    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length);
+    const investingDuration = parseInt(parseFloat(investingDeadline) * 60 * 60 *  24);
+    // First add to .json, so that we have the guarantee that if a project is on blockchain then we have its description in our database
     fetch('http://localhost:3004/projects/', {
       method: 'POST',
       body: JSON.stringify({
@@ -197,6 +197,7 @@ App = {
     })
     .then(res => res.json())
     .then(console.log)
+    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length);
     window.location.reload()
   },
 

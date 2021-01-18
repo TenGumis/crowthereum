@@ -96,7 +96,6 @@ App = {
         console.log(projectHash)
         console.log(project[0])
         const projectContent = project[0].toNumber()
-        const isProjectCompleted = await App.projects.isProjectCompleted(projectHash)
 
         const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
           return proj.id == projectHash });
@@ -104,13 +103,15 @@ App = {
         // Create the html for the task
         try 
         {
+          const isProjectCompleted = await App.projects.isProjectCompleted(projectFromBulletin.id)
+          console.log(isProjectCompleted)
           if(isProjectCompleted) {
             const $newCompletedProjectTemplate = $completedProjectTemplate.clone()
             $newCompletedProjectTemplate.find('.content').html(projectFromBulletin.title)
             $newCompletedProjectTemplate.find('input')
                             .prop('name', projectHash)
       
-            $('#projectList').append($newCompletedProjectTemplate)
+            $('#completedProjectList').append($newCompletedProjectTemplate)
     
             $newCompletedProjectTemplate.on('click', 'button', function(evt) {
               console.log(projectHash)
