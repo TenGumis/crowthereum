@@ -211,19 +211,6 @@ contract Projects {
     return (project.balance == project.projectGoal);
   }
 
-  function isProjectExpired(uint _projectHash) public view returns (bool) {
-    Project storage project = projects[projectIdx[_projectHash]];
-    if (isProjectFunded(_projectHash)) {
-      if (isProjectCompleted(_projectHash)) {
-        return false;
-      } else {
-        return project.milestones[project.currentMilestone].deadline < now;
-      }
-    } else {
-      return (project.investmentDeadline < now);
-    }
-  }
-
   function profitToClaim(uint _projectHash) public view returns (uint) {
     uint projectIndex = projectIdx[_projectHash];
     require(msg.sender == projects[projectIndex].owner);
@@ -233,5 +220,11 @@ contract Projects {
     }
 
     return claimableFunds;
+  }
+
+  function getMilestoneAcceptedPercentage(uint _projectHash, uint _milestoneIndex) public view returns (uint) {
+    Project storage currentProject = projects[projectIdx[_projectHash]];
+    require(_milestoneIndex == currentProject.currentMilestone);
+    return (currentProject.currentVoteStake * alphaRange ) / currentProject.projectGoal;
   }
 }

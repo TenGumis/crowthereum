@@ -82,53 +82,76 @@ App = {
       App.setLoading(false)
     },
   
+    isProjectExpired : async (projectHash) => {
+      const investmentDeadline = new Date(await App.projects.getInvestmentDeadline(projectHash) * 1000)
+      const completed = await App.projects.isProjectCompleted(projectHash)
+      const funded = await App.projects.isProjectFunded(projectHash)
+      const currentTime = new Date()
+
+      if (funded) {
+        if (completed) {
+          return false;
+        } else {
+          const currentMilestone = await App.projects.getCurrentMilestone(projectHash);
+          const milestoneDeadline = new Date(await App.projects.getMilestoneDeadline(projectHash, currentMilestone) * 1000);
+          return milestoneDeadline < currentTime;
+        }
+      } else {
+        return ( investmentDeadline < currentTime );
+      }
+    },
+
     renderProjects: async () => {
       // Load the total task count from the blockchain
       const taskCount = await App.projects.projectCount()
       const $projectTemplate = $('.projectTemplate')
       const $completedProjectTemplate = $('.completedProjectTemplate')
+      const $expiredProjectTemplate = $('.expiredProjectTemplate')
   
       // Render out each task with a new task template
       for (var i = 0; i < taskCount; i++) {
         // Fetch the task data from the blockchain
         const project = await App.projects.projects(i)
         const projectHash = project[0].toNumber()
-        console.log(projectHash)
-        console.log(project[0])
-        const projectContent = project[0].toNumber()
-
         const projectFromBulletin = App.bulletinBoard.projects.find((proj)=>{
-          return proj.id == projectHash });
+          return proj.id == projectHash }
+        );
   
-        // Create the html for the task
         try 
         {
           const isProjectCompleted = await App.projects.isProjectCompleted(projectFromBulletin.id)
-          console.log(isProjectCompleted)
-          if(isProjectCompleted) {
+          const isProjectExpired = await App.isProjectExpired(projectFromBulletin.id)
+          if (isProjectCompleted) {
             const $newCompletedProjectTemplate = $completedProjectTemplate.clone()
             $newCompletedProjectTemplate.find('.content').html(projectFromBulletin.title)
             $newCompletedProjectTemplate.find('input')
-                            .prop('name', projectHash)
       
             $('#completedProjectList').append($newCompletedProjectTemplate)
     
             $newCompletedProjectTemplate.on('click', 'button', function(evt) {
-              console.log(projectHash)
               window.location.href = "/project-details.html?id=" + projectFromBulletin.id;          
             })
             $newCompletedProjectTemplate.show()
 
+          } else if (isProjectExpired) {
+            const $newExpiredProjectTemplate = $expiredProjectTemplate.clone()
+            $newExpiredProjectTemplate.find('.content').html(projectFromBulletin.title)
+            $newExpiredProjectTemplate.find('input')
+      
+            $('#expiredProjectList').append($newExpiredProjectTemplate)
+    
+            $newExpiredProjectTemplate.on('click', 'button', function(evt) {
+              window.location.href = "/project-details.html?id=" + projectFromBulletin.id;          
+            })
+            $newExpiredProjectTemplate.show()
           } else {
             const $newProjectTemplate = $projectTemplate.clone()
             $newProjectTemplate.find('.content').html(projectFromBulletin.title)
             $newProjectTemplate.find('input')
-                            .prop('name', projectHash)
       
             $('#projectList').append($newProjectTemplate)
     
             $newProjectTemplate.on('click', 'button', function(evt) {
-              console.log(projectHash)
               window.location.href = "/project-details.html?id=" + projectFromBulletin.id;          
             })
             $newProjectTemplate.show()

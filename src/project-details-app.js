@@ -83,6 +83,25 @@ App = {
       // Update loading state
       App.setLoading(false)
     },
+
+    isProjectExpired : async (projectHash) => {
+      const investmentDeadline = new Date(await App.projects.getInvestmentDeadline(projectHash) * 1000)
+      const completed = await App.projects.isProjectCompleted(projectHash)
+      const funded = await App.projects.isProjectFunded(projectHash)
+      const currentTime = new Date()
+
+      if (funded) {
+        if (completed) {
+          return false;
+        } else {
+          const currentMilestone = await App.projects.getCurrentMilestone(projectHash);
+          const milestoneDeadline = new Date(await App.projects.getMilestoneDeadline(projectHash, currentMilestone) * 1000);
+          return milestoneDeadline < currentTime;
+        }
+      } else {
+        return ( investmentDeadline < currentTime );
+      }
+    },
     
     fundProject : async () => {
       App.setLoading(true)
@@ -143,19 +162,29 @@ App = {
       let goal = await App.projects.getProjectGoal(projectHash)
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
-      let projectAlpha = await App.projects.getProjectAlpha(projectHash)
+      const isProjectExpired = await App.isProjectExpired(projectHash)
       let str = ""
       if (funded) {
         if (completed) {
           str = "<b>Project is completed.</b>"
+        } else if (isProjectExpired) {
+          str = "<b>Project expired during milestone:</b> " + currentMilestone;
         } else {
           str = "<b>Project is started.</b><br><b>Current milestone: " + currentMilestone + "</b>"
         }
+      } else if (isProjectExpired) {
+        str = "<b>Project expired due to investment deadline.</b>"
       } else {
         str = "<b>Project is not yet funded.</b>"
       }
-      str += "<hr><br><b>" + "Project Alpha: </b>" + parseFloat(projectAlpha)/10 + "%"
       let p = document.getElementById("project-status")
+      p.innerHTML = str
+    },
+
+    setProjectAlpha: async (projectHash) => {
+      let projectAlpha = await App.projects.getProjectAlpha(projectHash)
+      str = "<b>" + "Project Alpha: </b>" + parseFloat(projectAlpha)/10 + "%"
+      let p = document.getElementById("project-alpha")
       p.innerHTML = str
     },
 
@@ -182,19 +211,28 @@ App = {
 
     setMilestones: async(projectHash) => {
       const $milestoneTemplate = $('.milestoneTemplate')
-
-      let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
-      let currentMilestone = await App.projects.getCurrentMilestone(projectHash);
-      let isProjectFunded = await App.projects.isProjectFunded(projectHash)
+      const numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash);
+      const currentMilestone = await App.projects.getCurrentMilestone(projectHash);
+      const isProjectFunded = await App.projects.isProjectFunded(projectHash)
       for (var milestoneIndex = 0; milestoneIndex < numberOfMilestones; milestoneIndex++) {
-        let milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
-        let milestoneDuration = (await App.projects.getMilestoneDuration(projectHash, milestoneIndex)) / (60 * 60 *  24);
-        let milestoneDeadline = await App.projects.getMilestoneDeadline(projectHash, milestoneIndex);
+        const milestoneGoal = await App.projects.getMilestoneGoal(projectHash, milestoneIndex);
+        const milestoneDuration = (await App.projects.getMilestoneDuration(projectHash, milestoneIndex)) / (60 * 60 *  24);
+        const milestoneDeadline = await App.projects.getMilestoneDeadline(projectHash, milestoneIndex);
+
+        let acceptedByStr = "";
+        if(isProjectFunded) {
+          if (milestoneIndex === currentMilestone.toNumber()) {
+            const acceptedBy = await App.projects.getMilestoneAcceptedPercentage(projectHash, milestoneIndex) / 10;
+            acceptedByStr = "<b> Accepted by: </b> " + acceptedBy + "% </br>";
+          }
+        }
         let deadline = " <b> Deadline: </b> " + new Date (milestoneDeadline.toNumber() * 1000).toUTCString()
         if (milestoneDeadline.toNumber() === 0) {
-          deadline = " Milestone not yet started, "
+          deadline = " <b> Deadline: </b>Milestone not yet started, "
         }
-        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + " ETH</br><b> Duration: </b> " + milestoneDuration + " days</br>" + deadline + "</p>";
+        let milestoneString = "<p><b>Cost: </b>" + web3.fromWei(milestoneGoal) + " ETH</br>" +
+          "<b> Duration: </b> " + milestoneDuration + " days</br>" +
+          deadline + "</br>" + acceptedByStr + "</p>";
 
         const $newMilestoneTemplate = $milestoneTemplate.clone()
         $newMilestoneTemplate.find('.content').html(milestoneString)
@@ -290,6 +328,7 @@ App = {
 
       App.setDescription(projectFromBulletin.description, projectFromBulletin.title)
       App.setProjectStatus(projectHash)
+      App.setProjectAlpha(projectHash)
       App.setBalance(projectHash)
       App.setGoal(projectHash)
       App.setDeadline(projectHash)
