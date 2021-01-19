@@ -155,10 +155,17 @@ App = {
     const title = $('#projectTitle').val()
     const description = $('#projectDescription').val()
     const investingDeadline = $('#investingDeadline').val();
+    const alphaValue = $('#projectAlphaValue').val()
     const hash = solSha3(title.concat(description))
 
     if (title == "" || description == "" || investingDeadline == "") {
       alert("You must specify title, description and deadline.")
+      return
+    }
+    const alphaIntValue = parseInt(parseFloat(alphaValue) * 10)
+
+    if (alphaIntValue <= 0 || alphaIntValue >= 900) {
+      alert("Alpha value has to be greater than 0% and less then 90%")
       return
     }
 
@@ -198,8 +205,7 @@ App = {
     .then(res => res.json())
     .then(console.log)
 
-    const alpha = 5 //TODO remove it! (value from 1-1000)
-    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length, alpha);
+    await App.projects.createProject(hash, investingDuration, goals, durations, milestones.length, alphaIntValue);
     window.location.reload()
   },
 

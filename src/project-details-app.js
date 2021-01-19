@@ -87,15 +87,21 @@ App = {
     fundProject : async () => {
       App.setLoading(true)
       let amount = document.getElementById('fund-amount').value;
-      
+
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
+      let projectAlpha = parseFloat(await App.projects.getProjectAlpha(id))/1000.0
+      let cost = projectAlpha/(1-projectAlpha) + 0.00001
+      let fee = (cost) * parseFloat(amount)
+      console.log(fee)
+      let sentValue = web3.toWei(parseFloat(amount) + fee)
+
       if (amount == "") {
         alert("You must set amount.")
         return
       }
       let weiAmount =  web3.toWei(parseFloat(amount))
-      await App.projects.fundProject(id, weiAmount, {value: weiAmount});
+      await App.projects.fundProject(id, weiAmount, {value: sentValue});
       window.location.reload()
     },
 
@@ -137,6 +143,7 @@ App = {
       let goal = await App.projects.getProjectGoal(projectHash)
       let currentMilestone = await App.projects.getCurrentMilestone(projectHash)
       let numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
+      let projectAlpha = await App.projects.getProjectAlpha(projectHash)
       let str = ""
       if (funded) {
         if (completed) {
@@ -147,6 +154,7 @@ App = {
       } else {
         str = "<b>Project is not yet funded.</b>"
       }
+      str += "<hr><br><b>" + "Project Alpha: </b>" + parseFloat(projectAlpha)/10 + "%"
       let p = document.getElementById("project-status")
       p.innerHTML = str
     },
