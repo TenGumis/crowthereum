@@ -127,7 +127,7 @@ App = {
 
     setDescription: async (descr, title) => {
       let p = document.getElementById("project-description-text")
-      p.innerHTML = "<b>" + title + "</b><br>\n" + descr
+      p.innerHTML = "<h2><b>" + title + "</b></h2><br>\n" + descr.replace(/\n/g, '<br />')
     },
 
     setProjectStatus: async (projectHash) => {
