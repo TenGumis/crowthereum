@@ -12,6 +12,7 @@ contract Projects {
     uint projectGoal;
     uint lastUnclaimedMilestone;
     uint currentVoteStake;
+    uint alpha; // <= alpha% investors don't need to vote to procceed
     mapping(uint => Milestone) milestones;
     mapping(address => uint) pledgeOf;
     mapping(address => uint) milestoneToAccept;
@@ -33,15 +34,17 @@ contract Projects {
     uint amount
   );
 
+  uint constant alphaRange = 1000;
   uint public projectCount = 0;
   mapping(uint => Project) public projects;
   mapping(uint => uint) public projectIdx;
 
-  function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones) public{
+  function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones, uint _alpha) public{
     require(_numberOfMilestones > 0);
     require(projects[projectIdx[_projectHash]].projectHash != _projectHash);
+    require(_alpha <= alphaRange);
     
-    Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0, 0);
+    Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0, 0, _alpha);
     projects[projectCount] = currentProject;
     projectIdx[_projectHash] = projectCount;
     
@@ -62,7 +65,7 @@ contract Projects {
     
     require(projects[projectIndex].balance < projects[projectIndex].projectGoal);
     require(currentProject.investmentDeadline >= now);
-    require(msg.value == _amount);
+    require(msg.value * (alphaRange - currentProject.alpha) >= alphaRange * _amount);
 
     uint investedAmount = 0;
     uint excessValue = 0;
@@ -143,7 +146,7 @@ contract Projects {
     projects[projectIndex].milestoneToAccept[msg.sender] = currentProject.currentMilestone + 1;
     projects[projectIndex].currentVoteStake += currentProject.pledgeOf[msg.sender];
 
-    if (currentProject.currentVoteStake > currentProject.projectGoal / 10 * 9) {
+    if (currentProject.currentVoteStake * alphaRange > (currentProject.projectGoal * (alphaRange - currentProject.alpha))) {
       projects[projectIndex].currentVoteStake = 0;
       projects[projectIndex].currentMilestone++;
       uint nextMilestone = projects[projectIndex].currentMilestone;

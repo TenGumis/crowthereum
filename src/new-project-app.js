@@ -197,7 +197,9 @@ App = {
     })
     .then(res => res.json())
     .then(console.log)
-    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length);
+
+    const alpha = 5 //TODO remove it! (value from 1-1000)
+    await App.projects.createProject(hash, investingDuration , goals, durations, milestones.length, alpha);
     window.location.reload()
   },
 

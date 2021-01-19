@@ -21,6 +21,9 @@ contract('Projects', (accounts) => {
     const duration = 30 
     const investmentDuration = 30
     const amount = 1000
+    const fee1 = 2;
+    const fee2 = 20;
+    const alpha = 1
 
     var result
 
@@ -30,7 +33,7 @@ contract('Projects', (accounts) => {
     const goals = [goal];
     const durations = [duration];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length , {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
     owner = result.logs[0].args.owner
 
@@ -38,12 +41,12 @@ contract('Projects', (accounts) => {
     const projectCount = await this.projectsContract.projectCount()
 
     // funding a project
-    result = await this.projectsContract.fundProject(descriptionHash, amount, {from: account_two, value: amount})
+    result = await this.projectsContract.fundProject(descriptionHash, amount, {from: account_two, value: amount + fee1})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, amount)
 
-    result = await this.projectsContract.fundProject(descriptionHash, goal-amount, {from: account_two, value: goal-amount})
+    result = await this.projectsContract.fundProject(descriptionHash, goal-amount, {from: account_two, value: goal-amount + fee2})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, goal)
@@ -65,6 +68,8 @@ contract('Projects', (accounts) => {
     const descriptionHash = 1234
     const investmentDuration = 1 // Important in that test
     const investmentAmount = 1000
+    const fee = 2;
+    const alpha = 1
 
     var result
 
@@ -74,12 +79,12 @@ contract('Projects', (accounts) => {
     const goals = [investmentAmount * 5];
     const durations = [1];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
 
     //assert.strictEqual(projectId.toNumber(), 0)
     // funding a project
-    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount, {from: account_two, value: investmentAmount})
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount, {from: account_two, value: investmentAmount + fee})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, investmentAmount)
@@ -91,7 +96,7 @@ contract('Projects', (accounts) => {
     await timeout( (investmentDuration + 1) * 1000);
 
     try {
-      result = await this.projectsContract.fundProject(descriptionHash, investmentAmount, {from: account_two, value: investmentAmount})
+      result = await this.projectsContract.fundProject(descriptionHash, investmentAmount, {from: account_two, value: investmentAmount + fee})
     } catch (error) {
       err = error
     }
@@ -108,6 +113,8 @@ contract('Projects', (accounts) => {
     const investmentDuration = 1 // Important in that test
     const investmentAmount1 = 1000
     const investmentAmount2 = 3000
+    const fee = 2;
+    const alpha = 1
 
     var result
 
@@ -117,12 +124,12 @@ contract('Projects', (accounts) => {
     const goals = [investmentAmount1 + investmentAmount2];
     const durations = [1];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
 
     //assert.strictEqual(projectId.toNumber(), 0)
     // funding a project
-    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1})
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1 + fee})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, investmentAmount1)
@@ -145,6 +152,9 @@ contract('Projects', (accounts) => {
     const investmentDuration = 1 // Important in that test
     const investmentAmount1 = 1000
     const investmentAmount2 = 3000
+    const fee1 = 2;
+    const fee2 = 6;
+    const alpha = 1
 
     var result
 
@@ -154,17 +164,17 @@ contract('Projects', (accounts) => {
     const goals = [investmentAmount1 + investmentAmount2];
     const durations = [1];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
 
     //assert.strictEqual(projectId.toNumber(), 0)
     // funding a project
-    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1})
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: account_two, value: investmentAmount1 + fee1})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, investmentAmount1)
 
-    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount2, {from: account_two, value: investmentAmount2})
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount2, {from: account_two, value: investmentAmount2 + fee2})
     project = await this.projectsContract.projects(projectId)
     projectBalance = await project.balance.toNumber()
     assert.strictEqual(projectBalance, investmentAmount1 + investmentAmount2)
@@ -182,6 +192,7 @@ contract('Projects', (accounts) => {
     const investmentDuration = 1 // Important in that test
     const investmentAmount1 = 1000
     const investmentAmount2 = 3000
+    const alpha = 1
 
     var result
 
@@ -191,11 +202,11 @@ contract('Projects', (accounts) => {
     const goals = [investmentAmount1 + investmentAmount2];
     const durations = [1];
 
-    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, {from: account_one})
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: account_one})
     projectId = await this.projectsContract.projectIdx(descriptionHash)
 
     try {
-      result = await this.projectsContract.createProject(descriptionHash, investmentDuration + 1, goals, durations, goals.length, {from: account_one})
+      result = await this.projectsContract.createProject(descriptionHash, investmentDuration + 1, goals, durations, goals.length, alpha, {from: account_one})
     } catch (error) {
       err = error
     }
