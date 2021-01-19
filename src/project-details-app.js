@@ -90,9 +90,10 @@ App = {
 
       let params = (new URL(document.location)).searchParams;
       let id = params.get("id");
-      let projectAlpha = await App.projects.getProjectAlpha(id)
-      let fee = (parseFloat(projectAlpha)*10/100) * parseFloat(amount)
-      
+      let projectAlpha = parseFloat(await App.projects.getProjectAlpha(id))/1000.0
+      let cost = projectAlpha/(1-projectAlpha) + 0.00001
+      let fee = (cost) * parseFloat(amount)
+      console.log(fee)
       let sentValue = web3.toWei(parseFloat(amount) + fee)
 
       if (amount == "") {
