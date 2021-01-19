@@ -185,6 +185,11 @@ contract Projects {
     return projects[projectIdx[_projectHash]].projectGoal;
   }
 
+
+  function getProjectAlpha(uint _projectHash) public view returns (uint) {
+    return projects[projectIdx[_projectHash]].alpha;
+  }
+
   function getCurrentMilestone(uint _projectHash) public view returns (uint) {
     return projects[projectIdx[_projectHash]].currentMilestone;
   }
