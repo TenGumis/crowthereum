@@ -37,7 +37,7 @@ App.fundProject = async () => {
     return
   }
 
-  const valueToSend = web3.toWei(parseFloat(amount) + fee)
+  const valueToSend = web3.toWei(parseFloat(amount) *(1 + App.projectFee))
   await App.projects.fundProject(App.projectId, web3.toWei(amount), {value: valueToSend});
   window.location.reload()
 }
@@ -146,58 +146,51 @@ App.setMilestones = async(projectHash) => {
 }
 
 App.setButtons = async (projectHash) => {
+  App.setFundButton(projectHash)
   App.setMilestoneButton(projectHash);
   App.setClaimFundsButton(projectHash);
   App.setReclaimInvestmentButton(projectHash);
 }
 
+App.setFundButton = async (projectHash) => {
+  let fundInput = document.getElementById("fund-amount")
+  let fundButton = document.getElementById("fund-button")
+  if (App.isProjectFunded) {
+    fundInput.style.display = "none"
+    fundButton.style.display = "none"
+  } else {
+    fundInput.style.display = ""
+    fundButton.style.display = ""
+  }
+}
+
 App.setMilestoneButton = async (projectHash) => {
   let div = document.getElementById("project-milestone-button")
-  if (App.isProjectInvestor === false) {
-    div.parentNode.removeChild(document.getElementById("milestone-elem1"))
-    div.parentNode.removeChild(document.getElementById("milestone-elem2"))
-    div.parentNode.removeChild(div)
+  if (App.isProjectInvestor === false || !App.isProjectFunded
+    || App.currentMilestone === App.numberOfMilestones || App.isProjectCompleted) 
     return
-  }
-
-  let str = "Vote " + App.currentMilestone + " as completed"
-  if (App.currentMilestone === App.numberOfMilestones){
-    div.parentNode.removeChild(document.getElementById("milestone-elem1"))
-    div.parentNode.removeChild(document.getElementById("milestone-elem2"))
-    div.parentNode.removeChild(div)
-  } else {
-    div.textContent = str
-  }
+  document.getElementById("milestone-elem").style.display = ""
+  div.style.display = ""
+  div.textContent = "Vote " + App.currentMilestone + " as completed"
 }
 
 App.setClaimFundsButton = async (projectHash) => {
   let div = document.getElementById("claim-funds-button")
-
-  if (App.account !== App.projectOwner) {
-    div.parentNode.removeChild(document.getElementById("claim-funds-elem1"))
-    div.parentNode.removeChild(document.getElementById("claim-funds-elem2"))
-    div.parentNode.removeChild(div)
+  if (App.account !== App.projectOwner)
     return
-  }
 
   let profitToClaim = await App.projects.profitToClaim(projectHash)
-  let str = "Claim Funds: " + web3.fromWei(profitToClaim) + " ETH"
-  if (profitToClaim.toNumber() === 0){
-    div.parentNode.removeChild(document.getElementById("claim-funds-elem1"))
-    div.parentNode.removeChild(document.getElementById("claim-funds-elem2"))
-    div.parentNode.removeChild(div)
-  } else {
-    div.textContent = str
-  }
+  if (profitToClaim.toNumber() === 0)
+    return
+  document.getElementById("claim-funds-elem").style.display = ""
+  div.style.display = ""
+  div.textContent = "Claim Funds: " + web3.fromWei(profitToClaim) + " ETH"
 }
 
 App.setReclaimInvestmentButton = async (projectHash) => {
-  let div = document.getElementById("reclaim-investment-button")
-
-  if (App.isProjectInvestor === false || App.isProjectExpired === false) {
-    div.parentNode.removeChild(div)
+  if (App.isProjectInvestor === false || App.isProjectExpired === false)
     return
-  }
+  document.getElementById("reclaim-investment-button").style.display = ""
 }
 
 App.renderProjectDetails = async () => {

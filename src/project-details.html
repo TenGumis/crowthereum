@@ -28,26 +28,41 @@
                     <h5>PROJECT:</h5>
                     <p id="project-description-text"></p>
                 </div><!-- / project-info-box -->
-
-                <div class="project-info-box">
-                    <p id="project-status"></p>
-                    <p id="project-fee"></p>
-                    <p id="project-alpha"></p>
-                    <p id="project-balance"></p>
-                    <p id="project-goal"></p>
-                    <p id="project-investment-deadline"></p>
-                </div><!-- / project-info-box -->
             </div><!-- / column -->
-
             <div class="col-md-4">
               <div class="project-info-box mt-0">
-                  <input id="fund-amount" type="number" class="form-control" placeholder="Amount of ETH" required>
-                  <div class="padding-box">
-                    <span onclick="App.fundProject()" class="btn btn-success">Fund the project</span><br>
-                  </div>
+                <h5>ACTIONS:</h5>
+                <input id="fund-amount" type="number" class="form-control" style="display: none" placeholder="Amount of ETH" required>
+                <div class="padding-box">
+                  <span id="fund-button" onclick="App.fundProject()" class="btn btn-success" style="display: none">Fund the project</span><br>
+                </div>
+                <span id="claim-funds-button" onclick="App.claimFunds()"  style="display: none" class="btn btn-success"></span>
+                <div id="claim-funds-elem" style="display:none">
+                  <br>
+                  <p> </p>
+                </div>
+                <span id="project-milestone-button" onclick="App.voteForCompletion()"  style="display: none" class="btn btn-success"></span>
+                <div id="milestone-elem" style="display:none">
+                  <br>
+                  <p> </p>
+                </div>
+                <span id="reclaim-investment-button" onclick="App.reclaimInvestment()"   style="display: none" class="btn btn-success">Reclaim Investment</span>
               </div>
             </div>
-
+          </div>
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="project-info-box">
+                <h5>PROJECT DETAILS:</h5>
+                <p id="project-status"></p>
+                <p id="project-fee"></p>
+                <p id="project-alpha"></p>
+                <p id="project-balance"></p>
+                <p id="project-goal"></p>
+                <p id="project-investment-deadline"></p>
+              </div><!-- / project-info-box -->
+            </div><!-- / column -->
             <div class="col-md-7">
               <div id="project-milestones-list" class="project-info-box">
                 <h5>MILESTONES:</h5>
@@ -60,16 +75,7 @@
             </div><!-- / column -->
 
             <div clas="col-md-4">
-              <div class="project-info-box">
-                <h5>ACTIONS:</h5>
-                <span id="claim-funds-button" onclick="App.claimFunds()" class="btn btn-success"></span>
-                <br id="claim-funds-elem1">
-                <p id="claim-funds-elem2"> </p>
-                <span id="project-milestone-button" onclick="App.voteForCompletion()" class="btn btn-success"></span>
-                <br id="milestone-elem1">
-                <p id="milestone-elem2"> </p>
-                <span id="reclaim-investment-button" onclick="App.reclaimInvestment()" class="btn btn-success">Reclaim Investment</span>
-              </div>
+              
             </div>
         </div>
       </div>

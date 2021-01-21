@@ -69,10 +69,6 @@ App.renderProjects = async () => {
   }
 }
   
-App.projectDetails = async (event) => { 
-  let arg1 = event.target.getAttribute('content');
-}
-  
 $(() => {
   $(window).load(() => {
     App.load()

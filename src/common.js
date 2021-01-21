@@ -50,13 +50,10 @@ App = {
     if (App.loading) {
       return
     }
-
     // Update app loading state
     App.setLoading(true)
-
     // Render Account
     $('#account').html(App.account)
-
     // Update loading state
     App.setLoading(false)
   },
