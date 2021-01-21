@@ -29,7 +29,8 @@
                   <input id="projectTitle" type="text" class="form-control margin-box" placeholder="Project title" required>
                   <textarea id="projectDescription" type="text" class="form-control margin-box" placeholder="Project description" required rows="5"></textarea>
                   <input id="investingDeadline" type="number" class="form-control margin-box" placeholder="Investing duration (in days)" required>
-                  <input id="projectAlphaValue" type="number" class="form-control margin-box" placeholder="Percentage of stake that isn't required to vote for the milestone" required>
+                  <input id="projectAlphaValue" oninput="App.setFee()" type="number" class="form-control margin-box" placeholder="Percentage of stake that isn't required to vote for the milestone" required>
+                  <p id="projectFee">Fee</p>
                 </div><!-- / project-info-box -->
             </div><!-- / column -->
 

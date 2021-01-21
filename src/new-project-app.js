@@ -24,6 +24,8 @@ function solSha3 (...args) {
 var closables = document.getElementsByClassName("close");
 
 App.contracts = {}
+App.milestones = {}
+App.lastMilestoneIndex = 0
 
 App.load = async () => {
   await App.loadWeb3()
@@ -33,24 +35,15 @@ App.load = async () => {
 }
 
 App.getMilestonesList = () => {
-  var t1 = document.getElementById('milestonesList');
-  var items = t1.getElementsByTagName('li');
-  result = []
-  for (var j = 0, m = items.length; j < m; j++) {
-    var arr = items[j].outerText.split(" ");
-    result.push({"duration": arr[0], "cost" : arr[1].slice(0,-2)});
-  }
-  return result;
+  return Object.keys(App.milestones).map(function(key){
+    return App.milestones[key];
+  });
 }
 
 App.addMilestone = () => {
   var li = document.createElement("li");
   const milestoneDeadline = $('#milestoneDeadline').val();
   const milestoneCost = $('#milestoneCost').val();
-  var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost));
-
-  li.appendChild(t1);
-
 
   if (milestoneDeadline == "" || milestoneCost == "") {
     alert("You must specify both the deadline and cost of a milestone!");
@@ -67,22 +60,43 @@ App.addMilestone = () => {
     return;
   }
 
+  let milestoneHTML = "<b>Cost:</b> " + milestoneCost + " ETH" + "<br>" + 
+                      "<b>Duration:</b> " + milestoneDeadline + " days" 
+  var t1 = document.createElement("span");
+  t1.class = "milestone-element"
+  t1.innerHTML = milestoneHTML
+  li.appendChild(t1);
+
   document.getElementById("milestonesList").appendChild(li);
   document.getElementById("milestoneDeadline").value = "";
   document.getElementById("milestoneCost").value = "";
-  
+  const toDelete = App.lastMilestoneIndex
+  App.milestones[App.lastMilestoneIndex++] = {"duration": milestoneDeadline, "cost" : milestoneCost}
+
   // Add a close button to the element's list.
-  var span = document.createElement("SPAN");
+  var span = document.createElement("span");
   var txt = document.createTextNode("\u00D7");
   span.className = "close";
   span.appendChild(txt);
   li.appendChild(span);
 
-  for (i = 0; i < closables.length; i++) {
-    closables[i].onclick = function() {
-      this.parentElement.parentElement.removeChild(this.parentElement);
-    }
+  closables[closables.length - 1].onclick = function() {
+    this.parentElement.parentElement.removeChild(this.parentElement);
+    delete App.milestones[toDelete]
   }
+}
+
+App.setFee = async () => {
+  let p = document.getElementById("projectFee")
+  const alphaValue = $('#projectAlphaValue').val()
+  const alpha = parseFloat(alphaValue)/100.0
+  let str = ""
+  if (alpha <= 0 || alpha >= 0.9) {
+    str = "-"
+  } else {
+    str = "Funding Fee: " + (computeFee(alpha) * 100).toFixed(2) + "%"
+  }
+  p.innerHTML = str
 }
 
 App.createProject = async () => { 
@@ -114,7 +128,7 @@ App.createProject = async () => {
   const durations = milestones.map( function(milestone) { 
     return milestone.duration * secondsPerDay;
   });
-  
+
   App.setLoading(true)
   const investingDuration = parseInt(parseFloat(investingDeadline) * secondsPerDay);
   // First add to .json, so that we have the guarantee that if a project is on blockchain then we have its description in our database

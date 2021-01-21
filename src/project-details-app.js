@@ -76,9 +76,17 @@ App.setProjectStatus = async (projectHash) => {
   p.innerHTML = str
 }
 
+
+App.setFee = async (projectHash) => {
+  let projectAlpha = await App.projects.getProjectAlpha(projectHash)
+  let p = document.getElementById("project-fee")
+  const alpha = parseFloat(projectAlpha)/1000.0
+  p.innerHTML = "<b>Funding Fee:</b> " + (computeFee(alpha) * 100).toFixed(2) + "%"
+}
+
 App.setProjectAlpha = async (projectHash) => {
   let projectAlpha = await App.projects.getProjectAlpha(projectHash)
-  str = "<b>" + "Project Alpha: </b>" + parseFloat(projectAlpha)/10 + "%"
+  str = "<b>" + "Alpha Value: </b>" + parseFloat(projectAlpha)/10 + "%"
   let p = document.getElementById("project-alpha")
   p.innerHTML = str
 }
@@ -213,6 +221,7 @@ App.renderProjectDetails = async () => {
 
   App.setDescription(projectFromBulletin.description, projectFromBulletin.title)
   App.setProjectStatus(projectHash)
+  App.setFee(projectHash)
   App.setProjectAlpha(projectHash)
   App.setBalance(projectHash)
   App.setGoal(projectHash)

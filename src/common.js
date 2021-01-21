@@ -1,6 +1,6 @@
 const secondsPerDay = 60 * 60 * 24
 let computeFee = (alpha) => {
-  return 1/(1 - alpha) + 0.0000000001 // round up
+  return 1/(1 - alpha) + 0.0000000000001 - 1.0// round up
 }
 
 
