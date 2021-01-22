@@ -122,14 +122,19 @@ p {
     margin-bottom: 15px;
     padding-bottom: 15px;
     border-bottom: 1px solid #d5dadb;
+    background-color: rgb(245, 245, 245);
 }
 
 .milestone-element-completed{
-    background-color: #f0f0f0;
+    background-color: #d1fdd1;
 }
 
 .milestone-element-active{
-    background-color: #d1fdd1;
+    background-color: #d1e4fd;
+}
+
+.milestone-element-expired{
+  background-color: #fdd1d1;
 }
 
 b, strong {

@@ -134,8 +134,11 @@ App.setMilestones = async(projectHash) => {
     const $newMilestoneTemplate = $milestoneTemplate.clone()
     $newMilestoneTemplate.find('.content').html(milestoneString)
     if(App.isProjectFunded) {
-      if (milestoneIndex === App.currentMilestone) {
-        $newMilestoneTemplate.addClass('milestone-element-active')
+      if (milestoneIndex === App.currentMilestone.toNumber()) {
+        if (App.isProjectExpired)
+          $newMilestoneTemplate.addClass('milestone-element-expired')
+        else
+          $newMilestoneTemplate.addClass('milestone-element-active')
       } else if (milestoneIndex < App.currentMilestone) {
         $newMilestoneTemplate.addClass('milestone-element-completed')
       }
