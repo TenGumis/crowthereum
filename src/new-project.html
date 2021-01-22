@@ -9,154 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <style>
-      main {
-        margin-top: 60px;
-      }
-
-      #content {
-        display: none;
-      }
-
-      form {
-        width: 350px;
-        margin-bottom: 10px;
-      }
-
-      ul {
-        margin-bottom: 0px;
-      }
-
-      body{
-        background:#f5f5f5;
-        margin-top:50px;
-      }
-      
-      .padding-box {
-        padding-top: 15px;
-        padding-bottom: 15px;
-      }
-      /*------- portfolio -------*/
-      .project {
-        margin: 15px 0;
-      }
-
-      .no-gutter .project {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      .has-spacer {
-        margin-left: 30px;
-        margin-right: 30px;
-        margin-bottom: 30px;
-      }
-
-      .has-spacer-extra-space {
-        margin-left: 30px;
-        margin-right: 30px;
-        margin-bottom: 30px;
-      }
-
-      .has-side-spacer {
-        margin-left: 30px;
-        margin-right: 30px;
-      }
-
-      .project-title {
-        font-size: 1.25rem;
-      }
-
-      .project-skill {
-        font-size: 0.9rem;
-        font-weight: 400;
-        letter-spacing: 0.06rem;
-      }
-
-      .project-info-box {
-        margin: 15px 0;
-        background-color: #fff;
-        padding: 30px 40px;
-        border-radius: 5px;
-      }
-
-      .project-info-box p {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #d5dadb;
-      }
-
-      .project-info-box p:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-      }
-      img {
-          width: 100%;
-          max-width: 100%;
-          height: auto;
-          -webkit-backface-visibility: hidden;
-      }
-      .rounded {
-          border-radius: 5px !important;
-      }
-      .btn-success-padding {
-          padding: 15px;
-      }
-      .btn-xs.btn-icon {
-          width: 34px;
-          height: 34px;
-          max-width: 34px !important;
-          max-height: 34px !important;
-          font-size: 10px;
-          line-height: 34px;
-      }
-      .btn-circle {
-          border-radius: 50% !important;
-      }
-      .project-info-box p {
-          margin-bottom: 15px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #d5dadb;
-      }
-      p {
-          font-family: "Barlow", sans-serif !important;
-          font-weight: 300;
-          font-size: 1rem;
-          color: #686c6d;
-          letter-spacing: 0.03rem;
-          margin-bottom: 10px;
-          padding: 10px;
-      }
-
-      .milestone-element{
-          margin-bottom: 15px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #d5dadb;
-      }
-
-      .milestone-element-completed{
-          background-color: #f0f0f0;
-      }
-
-      .milestone-element-active{
-          background-color: #d1fdd1;
-      }
-
-      b, strong {
-          font-weight: 700 !important;
-      }
-    
-
-    </style>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
@@ -176,7 +29,8 @@
                   <input id="projectTitle" type="text" class="form-control margin-box" placeholder="Project title" required>
                   <textarea id="projectDescription" type="text" class="form-control margin-box" placeholder="Project description" required rows="5"></textarea>
                   <input id="investingDeadline" type="number" class="form-control margin-box" placeholder="Investing duration (in days)" required>
-                  <input id="projectAlphaValue" type="number" class="form-control margin-box" placeholder="Percentage of stake that isn't required to vote for the milestone" required>
+                  <input id="projectAlphaValue" oninput="App.setFee()" type="number" class="form-control margin-box" placeholder="Percentage of stake that isn't required to vote for the milestone" required>
+                  <p id="projectFee">Fee</p>
                 </div><!-- / project-info-box -->
             </div><!-- / column -->
 
@@ -214,5 +68,6 @@
     <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="vendor/truffle-contract/dist/truffle-contract.js"></script>
   </body>
+  <script src="common.js"></script>
   <script src="new-project-app.js"></script>
 </html>

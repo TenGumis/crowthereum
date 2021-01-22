@@ -9,154 +9,7 @@
 
     <!-- Bootstrap -->
     <link href="vendor/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-
-    <style>
-      main {
-        margin-top: 60px;
-      }
-
-      #content {
-        display: none;
-      }
-
-      form {
-        width: 350px;
-        margin-bottom: 10px;
-      }
-
-      ul {
-        margin-bottom: 0px;
-      }
-
-      body{
-        background:#f5f5f5;
-        margin-top:50px;
-      }
-      
-      .padding-box {
-        padding-top: 15px;
-        padding-bottom: 15px;
-      }
-      /*------- portfolio -------*/
-      .project {
-        margin: 15px 0;
-      }
-
-      .no-gutter .project {
-        margin: 0 !important;
-        padding: 0 !important;
-      }
-
-      .has-spacer {
-        margin-left: 30px;
-        margin-right: 30px;
-        margin-bottom: 30px;
-      }
-
-      .has-spacer-extra-space {
-        margin-left: 30px;
-        margin-right: 30px;
-        margin-bottom: 30px;
-      }
-
-      .has-side-spacer {
-        margin-left: 30px;
-        margin-right: 30px;
-      }
-
-      .project-title {
-        font-size: 1.25rem;
-      }
-
-      .project-skill {
-        font-size: 0.9rem;
-        font-weight: 400;
-        letter-spacing: 0.06rem;
-      }
-
-      .project-info-box {
-        margin: 15px 0;
-        background-color: #fff;
-        padding: 30px 40px;
-        border-radius: 5px;
-      }
-
-      .project-info-box p {
-        margin-bottom: 15px;
-        padding-bottom: 15px;
-        border-bottom: 1px solid #d5dadb;
-      }
-
-      .project-info-box p:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-        border-bottom: none;
-      }
-      img {
-          width: 100%;
-          max-width: 100%;
-          height: auto;
-          -webkit-backface-visibility: hidden;
-      }
-      .rounded {
-          border-radius: 5px !important;
-      }
-      .btn-success-padding {
-          padding: 15px;
-      }
-      .btn-xs.btn-icon {
-          width: 34px;
-          height: 34px;
-          max-width: 34px !important;
-          max-height: 34px !important;
-          font-size: 10px;
-          line-height: 34px;
-      }
-      .btn-circle {
-          border-radius: 50% !important;
-      }
-      .project-info-box p {
-          margin-bottom: 15px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #d5dadb;
-      }
-      p {
-          font-family: "Barlow", sans-serif !important;
-          font-weight: 300;
-          font-size: 1rem;
-          color: #686c6d;
-          letter-spacing: 0.03rem;
-          margin-bottom: 10px;
-          padding: 10px;
-      }
-
-      .milestone-element{
-          margin-bottom: 15px;
-          padding-bottom: 15px;
-          border-bottom: 1px solid #d5dadb;
-      }
-
-      .milestone-element-completed{
-          background-color: #f0f0f0;
-      }
-
-      .milestone-element-active{
-          background-color: #d1fdd1;
-      }
-
-      b, strong {
-          font-weight: 700 !important;
-      }
-    
-
-    </style>
+    <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
@@ -175,25 +28,41 @@
                     <h5>PROJECT:</h5>
                     <p id="project-description-text"></p>
                 </div><!-- / project-info-box -->
-
-                <div class="project-info-box">
-                    <p id="project-status"></p>
-                    <p id="project-alpha"></p>
-                    <p id="project-balance"></p>
-                    <p id="project-goal"></p>
-                    <p id="project-investment-deadline"></p>
-                </div><!-- / project-info-box -->
             </div><!-- / column -->
-
             <div class="col-md-4">
               <div class="project-info-box mt-0">
-                  <input id="fund-amount" type="number" class="form-control" placeholder="Amount of ETH" required>
-                  <div class="padding-box">
-                    <span onclick="App.fundProject()" class="btn btn-success">Fund the project</span><br>
-                  </div>
+                <h5>ACTIONS:</h5>
+                <input id="fund-amount" type="number" class="form-control" style="display: none" placeholder="Amount of ETH" required>
+                <div class="padding-box">
+                  <span id="fund-button" onclick="App.fundProject()" class="btn btn-success" style="display: none">Fund the project</span><br>
+                </div>
+                <span id="claim-funds-button" onclick="App.claimFunds()"  style="display: none" class="btn btn-success"></span>
+                <div id="claim-funds-elem" style="display:none">
+                  <br>
+                  <p> </p>
+                </div>
+                <span id="project-milestone-button" onclick="App.voteForCompletion()"  style="display: none" class="btn btn-success"></span>
+                <div id="milestone-elem" style="display:none">
+                  <br>
+                  <p> </p>
+                </div>
+                <span id="reclaim-investment-button" onclick="App.reclaimInvestment()"   style="display: none" class="btn btn-success">Reclaim Investment</span>
               </div>
             </div>
-
+          </div>
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="project-info-box">
+                <h5>PROJECT DETAILS:</h5>
+                <p id="project-status"></p>
+                <p id="project-fee"></p>
+                <p id="project-alpha"></p>
+                <p id="project-balance"></p>
+                <p id="project-goal"></p>
+                <p id="project-investment-deadline"></p>
+              </div><!-- / project-info-box -->
+            </div><!-- / column -->
             <div class="col-md-7">
               <div id="project-milestones-list" class="project-info-box">
                 <h5>MILESTONES:</h5>
@@ -206,16 +75,7 @@
             </div><!-- / column -->
 
             <div clas="col-md-4">
-              <div class="project-info-box">
-                <h5>ACTIONS:</h5>
-                <span id="claim-funds-button" onclick="App.claimFunds()" class="btn btn-success"></span>
-                <br id="claim-funds-elem1">
-                <p id="claim-funds-elem2"> </p>
-                <span id="project-milestone-button" onclick="App.voteForCompletion()" class="btn btn-success"></span>
-                <br id="milestone-elem1">
-                <p id="milestone-elem2"> </p>
-                <span id="reclaim-investment-button" onclick="App.reclaimInvestment()" class="btn btn-success">Reclaim Investment</span>
-              </div>
+              
             </div>
         </div>
       </div>
@@ -225,5 +85,6 @@
     <script src="vendor/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="vendor/truffle-contract/dist/truffle-contract.js"></script>
   </body>
+  <script src="common.js"></script>
   <script src="project-details-app.js"></script>
 </html>

@@ -20,208 +20,140 @@ function solSha3 (...args) {
 
   return web3.sha3(args, { encoding: 'hex' })
 }
-// Click on a close button to hide the current list item
-var close = document.getElementsByClassName("close");
 
-App = {
-  loading: false,
-  contracts: {},
+var closables = document.getElementsByClassName("close");
 
-  load: async () => {
-    await App.loadWeb3()
-    await App.loadAccount()
-    await App.loadContract()
-    await App.render()
-  },
+App.contracts = {}
+App.milestones = {}
+App.lastMilestoneIndex = 0
 
-  // https://medium.com/metamask/https-medium-com-metamask-breaking-change-injecting-web3-7722797916a8
-  loadWeb3: async () => {
-    if (typeof web3 !== 'undefined') {
-      App.web3Provider = web3.currentProvider
-      web3 = new Web3(web3.currentProvider)
-    } else {
-      window.alert("Please connect to Metamask.")
-    }
-    // Modern dapp browsers...
-    if (window.ethereum) {
-      window.web3 = new Web3(ethereum)
-      try {
-        // Request account access if needed
-        await ethereum.enable()
-        // Acccounts now exposed
-        web3.eth.sendTransaction({/* ... */})
-      } catch (error) {
-        // User denied account access...
-      }
-    }
-    // Legacy dapp browsers...
-    else if (window.web3) {
-      App.web3Provider = web3.currentProvider
-      window.web3 = new Web3(web3.currentProvider)
-      // Acccounts always exposed
-      web3.eth.sendTransaction({/* ... */})
-    }
-    // Non-dapp browsers...
-    else {
-      console.log('Non-Ethereum browser detected. You should consider trying MetaMask!')
-    }
-  },
+App.load = async () => {
+  await App.loadWeb3()
+  await App.loadAccount()
+  await App.loadContract()
+  await App.render()
+}
 
-  loadAccount: async () => {
-    // Set the current blockchain account
-    App.account = web3.eth.accounts[0]
-  },
+App.getMilestonesList = () => {
+  return Object.keys(App.milestones).map(function(key){
+    return App.milestones[key];
+  });
+}
 
-  loadContract: async () => {
-    // Create a JavaScript version of the smart contract
-    const projects = await $.getJSON('Projects.json')
-    App.contracts.Projects = TruffleContract(projects)
-    App.contracts.Projects.setProvider(App.web3Provider)
+App.addMilestone = () => {
+  var li = document.createElement("li");
+  const milestoneDeadline = $('#milestoneDeadline').val();
+  const milestoneCost = $('#milestoneCost').val();
 
-    // Hydrate the smart contract with values from the blockchain
-    App.projects = await App.contracts.Projects.deployed()
-  },
+  if (milestoneDeadline == "" || milestoneCost == "") {
+    alert("You must specify both the deadline and cost of a milestone!");
+    return;
+  }
 
-  getMilestonesList: () => {
-    var t1 = document.getElementById('milestonesList');
-    var items = t1.getElementsByTagName('li');
-    result = []
-    for (var j = 0, m = items.length; j < m; j++) {
-      var arr = items[j].outerText.split(" ");
-      result.push({"duration": arr[0], "cost" : arr[1].slice(0,-2)});
-    }
-    return result;
-  },
+  if (parseFloat(milestoneCost) <= 0) {
+    alert("Cost has to be greater than 0. ")
+    return;
+  }
 
-  render: async () => {
-    // Prevent double render
-    if (App.loading) {
-      return
-    }
+  if (parseFloat(milestoneDeadline) <= 0) {
+    alert("Milestone duration has to be greater than 0.")
+    return;
+  }
 
-    // Update app loading state
-    App.setLoading(true)
+  let milestoneHTML = "<b>Cost:</b> " + milestoneCost + " ETH" + "<br>" + 
+                      "<b>Duration:</b> " + milestoneDeadline + " days" 
+  var t1 = document.createElement("span");
+  t1.class = "milestone-element"
+  t1.innerHTML = milestoneHTML
+  li.appendChild(t1);
 
-    // Render Account
-    $('#account').html(App.account)
+  document.getElementById("milestonesList").appendChild(li);
+  document.getElementById("milestoneDeadline").value = "";
+  document.getElementById("milestoneCost").value = "";
+  const toDelete = App.lastMilestoneIndex
+  App.milestones[App.lastMilestoneIndex++] = {"duration": milestoneDeadline, "cost" : milestoneCost}
 
-    // Update loading state
-    App.setLoading(false)
-  },
+  // Add a close button to the element's list.
+  var span = document.createElement("span");
+  var txt = document.createTextNode("\u00D7");
+  span.className = "close";
+  span.appendChild(txt);
+  li.appendChild(span);
 
-  addMilestone: () => {
-    var li = document.createElement("li");
-    var milestoneDeadline = $('#milestoneDeadline').val();
-    var milestoneCost = $('#milestoneCost').val();
-    var t1 = document.createTextNode(milestoneDeadline.concat(" ",milestoneCost));
-
-    li.appendChild(t1);
-
-
-    if (milestoneDeadline == "" || milestoneCost == "") {
-      alert("You must specify both the deadline and cost of a milestone!");
-      return;
-    }
-
-    if (parseFloat(milestoneCost) <= 0) {
-      alert("Cost has to be greater than 0. ")
-      return;
-    }
-
-    if (parseFloat(milestoneDeadline) <= 0) {
-      alert("Milestone duration has to be greater than 0.")
-      return;
-    }
-
-    document.getElementById("milestonesList").appendChild(li);
-    document.getElementById("milestoneDeadline").value = "";
-    document.getElementById("milestoneCost").value = "";
-  
-    // Add a close button to the element's list.
-    var span = document.createElement("SPAN");
-    var txt = document.createTextNode("\u00D7");
-    span.className = "close";
-    span.appendChild(txt);
-    li.appendChild(span);
-  
-    for (i = 0; i < close.length; i++) {
-      close[i].onclick = function() {
-        this.parentElement.parentElement.removeChild(this.parentElement);
-      }
-    }
-  },
-
-  createProject: async () => { 
-    const title = $('#projectTitle').val()
-    const description = $('#projectDescription').val()
-    const investingDeadline = $('#investingDeadline').val();
-    const alphaValue = $('#projectAlphaValue').val()
-    const hash = solSha3(title.concat(description))
-
-    if (title == "" || description == "" || investingDeadline == "") {
-      alert("You must specify title, description and deadline.")
-      return
-    }
-    const alphaIntValue = parseInt(parseFloat(alphaValue) * 10)
-
-    if (alphaIntValue <= 0 || alphaIntValue >= 900) {
-      alert("Alpha value has to be greater than 0% and less then 90%")
-      return
-    }
-
-    const milestones = App.getMilestonesList();
-    console.log(milestones)
-    if (milestones.length == 0) {
-      alert("Project has to have a non-empty list of milestones.")
-      return
-    }
-    const goals = milestones.map( function(milestone) { 
-      return web3.toWei(milestone.cost)
-    });
-    console.log(goals)
-    const durations = milestones.map( function(milestone) { 
-      return milestone.duration * 60 * 60 *  24;
-    });
-    console.log(durations)
-
-    App.setLoading(true)
-    const investingDuration = parseInt(parseFloat(investingDeadline) * 60 * 60 *  24);
-    // First add to .json, so that we have the guarantee that if a project is on blockchain then we have its description in our database
-    fetch('http://localhost:3004/projects/', {
-      method: 'POST',
-      body: JSON.stringify({
-        id: hash,
-        hash: hash,
-        title: title,
-        description: description,
-        milestones: App.getMilestonesList(),
-        investmentDuration: investingDuration,
-        owner: App.account
-      }),
-      headers: {
-        'Content-type': 'application/json; charset=UTF-8'
-      }
-    })
-    .then(res => res.json())
-    .then(console.log)
-
-    await App.projects.createProject(hash, investingDuration, goals, durations, milestones.length, alphaIntValue);
-    window.location.reload()
-  },
-
-  setLoading: (boolean) => {
-    App.loading = boolean
-    const loader = $('#loader')
-    const content = $('#content')
-    if (boolean) {
-      loader.show()
-      content.hide()
-    } else {
-      loader.hide()
-      content.show()
-    }
+  closables[closables.length - 1].onclick = function() {
+    this.parentElement.parentElement.removeChild(this.parentElement);
+    delete App.milestones[toDelete]
   }
 }
+
+App.setFee = async () => {
+  let p = document.getElementById("projectFee")
+  const alphaValue = $('#projectAlphaValue').val()
+  const alpha = parseFloat(alphaValue)/100.0
+  let str = ""
+  if (alpha <= 0 || alpha >= 0.9) {
+    str = "-"
+  } else {
+    str = "Funding Fee: " + (computeFee(alpha) * 100).toFixed(2) + "%"
+  }
+  p.innerHTML = str
+}
+
+App.createProject = async () => { 
+  const title = $('#projectTitle').val()
+  const description = $('#projectDescription').val()
+  const investingDeadline = $('#investingDeadline').val();
+  const alphaValue = $('#projectAlphaValue').val()
+  const hash = solSha3(title.concat(description))
+
+  if (title == "" || description == "" || investingDeadline == "") {
+    alert("You must specify title, description and deadline.")
+    return
+  }
+  const alphaIntValue = parseInt(parseFloat(alphaValue) * 10)
+
+  if (alphaIntValue <= 0 || alphaIntValue >= 900) {
+    alert("Alpha value has to be greater than 0% and less then 90%")
+    return
+  }
+
+  const milestones = App.getMilestonesList();
+  if (milestones.length == 0) {
+    alert("Project has to have a non-empty list of milestones.")
+    return
+  }
+  const goals = milestones.map( function(milestone) { 
+    return web3.toWei(milestone.cost)
+  });
+  const durations = milestones.map( function(milestone) { 
+    return milestone.duration * secondsPerDay;
+  });
+
+  App.setLoading(true)
+  const investingDuration = parseInt(parseFloat(investingDeadline) * secondsPerDay);
+  // First add to .json, so that we have the guarantee that if a project is on blockchain then we have its description in our database
+  fetch('http://localhost:3004/projects/', {
+    method: 'POST',
+    body: JSON.stringify({
+      id: hash,
+      hash: hash,
+      title: title,
+      description: description,
+      milestones: App.getMilestonesList(),
+      investmentDuration: investingDuration,
+      owner: App.account
+    }),
+    headers: {
+      'Content-type': 'application/json; charset=UTF-8'
+    }
+  })
+  .then(res => res.json())
+  .then(console.log)
+
+  await App.projects.createProject(hash, investingDuration, goals, durations, milestones.length, alphaIntValue);
+  window.location.reload()
+}
+
 
 $(() => {
   $(window).load(() => {
