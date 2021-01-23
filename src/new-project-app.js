@@ -136,12 +136,8 @@ App.createProject = async () => {
     method: 'POST',
     body: JSON.stringify({
       id: hash,
-      hash: hash,
       title: title,
       description: description,
-      milestones: App.getMilestonesList(),
-      investmentDuration: investingDuration,
-      owner: App.account
     }),
     headers: {
       'Content-type': 'application/json; charset=UTF-8'
