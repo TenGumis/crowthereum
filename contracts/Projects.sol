@@ -84,7 +84,8 @@ contract Projects {
     projects[projectIndex].balance += investedAmount;
 
     if (excessValue > 0) {
-      msg.sender.transfer(excessValue);
+      uint excessFee = (excessValue * currentProject.alpha) / (alphaRange - currentProject.alpha);
+      msg.sender.transfer(excessValue + excessFee);
     }
     emit FundSent(currentProject.projectHash, investedAmount);
   }

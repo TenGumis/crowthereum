@@ -7,6 +7,10 @@ contract('Projects', (accounts) => {
     this.projectsContract = await Projects.deployed()
   })
 
+  function calculateFee(value, alpha) {
+    return Math.ceil(((value * alpha) / (1000 - alpha)))
+  }
+
   it('deploys successfully', async () => {
     const address = await this.projectsContract.address
     assert.notStrictEqual(address, 0x0)
@@ -186,7 +190,6 @@ contract('Projects', (accounts) => {
     assert.strictEqual(currentMilestone, 1)
   })
 
-
   it('createSameProjectTwice', async () => {
     const descriptionHash = 1237
     const investmentDuration = 1 // Important in that test
@@ -212,5 +215,60 @@ contract('Projects', (accounts) => {
     }
     
     assert.ok(err instanceof Error)
+  })
+
+
+  it('investmentFeeAfterExcess', async () => {
+    const descriptionHash = 2115
+    const goal = 10 * 1000000
+    const duration = 30 
+    const investmentDuration = 30
+    const investmentAmount1 = 9 * 1000000
+    const investmentAmount2 = 100 * 1000000
+    const alpha = 100
+
+    var result
+
+    const accountOne = accounts[0]
+    const accountTwo = accounts[3]
+
+    const goals = [goal];
+    const durations = [duration];
+
+    result = await this.projectsContract.createProject(descriptionHash, investmentDuration, goals, durations, goals.length, alpha, {from: accountOne})
+    projectId = await this.projectsContract.projectIdx(descriptionHash)
+    owner = result.logs[0].args.owner
+
+    assert.strictEqual(accountOne, owner)
+    const projectCount = await this.projectsContract.projectCount()
+
+    let balanceBefore = await web3.eth.getBalance(accountTwo);
+
+    // funding a project
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount1, {from: accountTwo, value: investmentAmount1 + calculateFee(investmentAmount1, alpha)})
+    gasUsed = result.receipt.gasUsed;
+    txInfo = await web3.eth.getTransaction(result.tx);
+    gasPrice = txInfo.gasPrice;
+    const transactionCost1 = gasPrice *gasUsed
+
+    project = await this.projectsContract.projects(projectId)
+    projectBalance = await project.balance.toNumber()
+    assert.strictEqual(projectBalance, investmentAmount1)
+
+    result = await this.projectsContract.fundProject(descriptionHash, investmentAmount2, {from: accountTwo, value: investmentAmount2 + calculateFee(investmentAmount2, alpha)})
+    gasUsed = result.receipt.gasUsed;
+    txInfo = await web3.eth.getTransaction(result.tx);
+    gasPrice = txInfo.gasPrice;
+    const transactionCost2 = gasPrice *gasUsed
+
+    project = await this.projectsContract.projects(projectId)
+    projectBalance = await project.balance.toNumber()
+    assert.strictEqual(projectBalance, goal)
+    
+    let balanceAfter = await web3.eth.getBalance(accountTwo);
+    let expenses = goal + calculateFee(investmentAmount1, alpha) + calculateFee(goal - investmentAmount1, alpha);
+    const expectedValue = web3.utils.toBN(balanceAfter).add(web3.utils.toBN(expenses)).add(web3.utils.toBN(transactionCost1)).add(web3.utils.toBN(transactionCost2)).toString()
+
+    assert.strictEqual(balanceBefore, expectedValue, "Balance incorrect!");
   })
 })
