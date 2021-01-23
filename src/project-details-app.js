@@ -169,7 +169,7 @@ App.setFundButton = async (projectHash) => {
 
 App.setMilestoneButton = async (projectHash) => {
   let div = document.getElementById("project-milestone-button")
-  if (App.isProjectInvestor === false || !App.isProjectFunded
+  if (App.isProjectInvestor === false || !App.isProjectFunded || App.isProjectExpired
     || App.currentMilestone === App.numberOfMilestones || App.isProjectCompleted) 
     return
   document.getElementById("milestone-elem").style.display = ""
