@@ -3,7 +3,6 @@ let computeFee = (alpha) => {
   return alpha/(1 - alpha) + 0.0000000000001// round up
 }
 
-
 App = {
   loading: false,
 
