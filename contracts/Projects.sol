@@ -108,31 +108,33 @@ contract Projects {
 
   function reclaimInvestment(uint _projectHash) public {
     uint projectIndex = projectIdx[_projectHash];
-    require(projects[projectIndex].pledgeOf[msg.sender] > 0);
-    uint currentMilestone = projects[projectIndex].currentMilestone;
-    uint numberOfMilestones = projects[projectIndex].numberOfMilestones;
+    Project storage currentProject = projects[projectIndex];
+    require(currentProject.pledgeOf[msg.sender] > 0);
+    uint currentMilestone = currentProject.currentMilestone;
+    uint numberOfMilestones = currentProject.numberOfMilestones;
     require(currentMilestone < numberOfMilestones);
     
     uint amountToReturn = 0;
 
     if(isProjectFunded(_projectHash)) {
-      require(projects[projectIndex].milestones[currentMilestone].deadline < now);
+      require(currentProject.milestones[currentMilestone].deadline < now);
 
       amountToReturn = 0;
-      for (uint i = currentMilestone; i < projects[projectIndex].numberOfMilestones; i++) {
-        amountToReturn += projects[projectIndex].milestones[i].goal;
+      for (uint i = currentMilestone; i < currentProject.numberOfMilestones; i++) {
+        amountToReturn += currentProject.milestones[i].goal;
       }
-      amountToReturn = (amountToReturn * projects[projectIndex].pledgeOf[msg.sender]) / projects[projectIndex].projectGoal;
+      amountToReturn = (amountToReturn * currentProject.pledgeOf[msg.sender]) / currentProject.projectGoal;
 
     } else {
 
       require(projects[projectIndex].investmentDeadline < now);
       amountToReturn = projects[projectIndex].pledgeOf[msg.sender];
     }
+    uint feeToReturn = (amountToReturn * currentProject.alpha) / (alphaRange - currentProject.alpha);
 
     projects[projectIndex].pledgeOf[msg.sender] = 0;
-    msg.sender.transfer(amountToReturn);
-    emit FundSent(projects[projectIndex].projectHash, amountToReturn);
+    msg.sender.transfer(amountToReturn + feeToReturn);
+    emit FundSent(projects[projectIndex].projectHash, amountToReturn + feeToReturn);
   }
 
   function voteForMilestoneCompletion(uint _projectHash, uint _milestoneIndex) public {
