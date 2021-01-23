@@ -115,18 +115,13 @@ contract Projects {
     require(currentMilestone < numberOfMilestones);
     
     uint amountToReturn = 0;
-
     if(isProjectFunded(_projectHash)) {
       require(currentProject.milestones[currentMilestone].deadline < now);
-
-      amountToReturn = 0;
       for (uint i = currentMilestone; i < currentProject.numberOfMilestones; i++) {
         amountToReturn += currentProject.milestones[i].goal;
       }
       amountToReturn = (amountToReturn * currentProject.pledgeOf[msg.sender]) / currentProject.projectGoal;
-
     } else {
-
       require(projects[projectIndex].investmentDeadline < now);
       amountToReturn = projects[projectIndex].pledgeOf[msg.sender];
     }
@@ -212,6 +207,34 @@ contract Projects {
   function isProjectFunded(uint _projectHash) public view returns (bool) {
     Project storage project = projects[projectIdx[_projectHash]];
     return (project.balance == project.projectGoal);
+  }
+
+  function fundsToReclaim(uint _projectHash, address _account) public view returns (uint) {
+    uint projectIndex = projectIdx[_projectHash];
+    Project storage currentProject = projects[projectIndex];
+    if(currentProject.pledgeOf[_account] == 0)
+      return 0;
+    uint currentMilestone = currentProject.currentMilestone;
+    uint numberOfMilestones = currentProject.numberOfMilestones;
+    if (currentMilestone >= numberOfMilestones)
+      return 0;
+
+    uint amountToReturn = 0;
+    if(isProjectFunded(_projectHash)) {
+      if(currentProject.milestones[currentMilestone].deadline > now)
+        return 0;
+      for (uint i = currentMilestone; i < currentProject.numberOfMilestones; i++) {
+        amountToReturn += currentProject.milestones[i].goal;
+      }
+      amountToReturn = (amountToReturn * currentProject.pledgeOf[_account]) / currentProject.projectGoal;
+    } else {
+      if(projects[projectIndex].investmentDeadline > now)
+        return 0;
+      amountToReturn = projects[projectIndex].pledgeOf[_account];
+    }
+
+    uint feeToReturn = (amountToReturn * currentProject.alpha) / (alphaRange - currentProject.alpha);
+    return amountToReturn + feeToReturn;
   }
 
   function profitToClaim(uint _projectHash) public view returns (uint) {
