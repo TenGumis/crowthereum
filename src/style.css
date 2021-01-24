@@ -137,6 +137,10 @@ p {
   background-color: #fdd1d1;
 }
 
+.list-group-item {
+  font-size: large;
+}
+
 b, strong {
     font-weight: 700 !important;
 }
