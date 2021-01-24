@@ -27,6 +27,7 @@ App.loadProjectDetails = async () => {
   App.projectDeadline = await App.projects.getInvestmentDeadline(projectHash)
   App.numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
   App.profitToClaim = await App.projects.profitToClaim(projectHash)
+  App.fundsToReclaim = await App.projects.fundsToReclaim(projectHash, App.account, Math.round(new Date().getTime()/1000))
 }
 
 App.fundProject = async () => {
@@ -148,17 +149,17 @@ App.setMilestones = async(projectHash) => {
   }
 }
 
-App.setButtons = async (projectHash) => {
-  App.setFundButton(projectHash)
-  App.setMilestoneButton(projectHash);
-  App.setClaimFundsButton(projectHash);
-  App.setReclaimInvestmentButton(projectHash);
+App.setButtons = () => {
+  App.setFundButton()
+  App.setMilestoneButton();
+  App.setClaimFundsButton();
+  App.setReclaimInvestmentButton();
 }
 
-App.setFundButton = async (projectHash) => {
+App.setFundButton = () => {
   let fundInput = document.getElementById("fund-amount")
   let fundButton = document.getElementById("fund-button")
-  if (App.isProjectFunded) {
+  if (App.isProjectFunded || App.isProjectExpired) {
     fundInput.style.display = "none"
     fundButton.style.display = "none"
   } else {
@@ -167,7 +168,7 @@ App.setFundButton = async (projectHash) => {
   }
 }
 
-App.setMilestoneButton = async (projectHash) => {
+App.setMilestoneButton = () => {
   let div = document.getElementById("project-milestone-button")
   if (App.isProjectInvestor === false || !App.isProjectFunded || App.isProjectExpired
     || App.currentMilestone === App.numberOfMilestones || App.isProjectCompleted) 
@@ -177,23 +178,21 @@ App.setMilestoneButton = async (projectHash) => {
   div.textContent = "Vote " + App.currentMilestone + " as completed"
 }
 
-App.setClaimFundsButton = async (projectHash) => {
+App.setClaimFundsButton = () => {
   let div = document.getElementById("claim-funds-button")
-  if (App.account !== App.projectOwner)
-    return
-
-  let profitToClaim = await App.projects.profitToClaim(projectHash)
-  if (profitToClaim.toNumber() === 0)
+  if (App.account !== App.projectOwner || App.profitToClaim.toNumber() === 0)
     return
   document.getElementById("claim-funds-elem").style.display = ""
   div.style.display = ""
-  div.textContent = "Claim Funds: " + web3.fromWei(profitToClaim) + " ETH"
+  div.textContent = "Claim Funds: " + web3.fromWei(App.profitToClaim) + " ETH"
 }
 
-App.setReclaimInvestmentButton = async (projectHash) => {
-  if (App.isProjectInvestor === false || App.isProjectExpired === false)
+App.setReclaimInvestmentButton = () => {
+  if (App.isProjectInvestor === false || App.isProjectExpired === false || App.fundsToReclaim == 0)
     return
-  document.getElementById("reclaim-investment-button").style.display = ""
+  let button = document.getElementById("reclaim-investment-button")
+  button.style.display = ""
+  button.textContent = "Reclaim remaining: " + web3.fromWei(App.fundsToReclaim).round(4) + " ETH"
 }
 
 App.renderProjectDetails = async () => {
@@ -210,7 +209,7 @@ App.renderProjectDetails = async () => {
   App.setGoal()
   App.setDeadline()
   App.setMilestones(projectHash)
-  App.setButtons(projectHash)
+  App.setButtons()
 }
   
 $(() => {
