@@ -3,6 +3,10 @@ let computeFee = (alpha) => {
   return alpha/(1 - alpha) + 0.0000000000001// round up
 }
 
+function calculateFee(value, alpha) {
+  return Math.ceil(((value * alpha) / (1000 - alpha)))
+}
+
 App = {
   loading: false,
 

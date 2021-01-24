@@ -30,7 +30,7 @@ contract Projects {
   );
 
   event FundSent(
-    uint _projectHash,
+    uint projectHash,
     uint amount
   );
 
@@ -42,7 +42,7 @@ contract Projects {
   function createProject(uint _projectHash, uint _investmentDuration, uint[] memory _goals, uint[] memory _durations, uint _numberOfMilestones, uint _alpha) public{
     require(_numberOfMilestones > 0);
     require(projects[projectIdx[_projectHash]].projectHash != _projectHash);
-    require(_alpha <= alphaRange);
+    require(_alpha < alphaRange);
     
     Project memory currentProject = Project(_projectHash, msg.sender, now + (_investmentDuration * 1 seconds), _numberOfMilestones, 0, 0, 0, 0, 0, _alpha);
     projects[projectCount] = currentProject;

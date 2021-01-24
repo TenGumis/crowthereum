@@ -16,7 +16,7 @@ App.load = async () => {
 App.loadProjectDetails = async () => {
   const projectHash = App.projectId
   App.currentMilestone = await App.projects.getCurrentMilestone(projectHash)
-  App.projectAlpha = parseFloat(await App.projects.getProjectAlpha(projectHash)) / 1000.0
+  App.projectAlpha = parseFloat(await App.projects.getProjectAlpha(projectHash))
   App.projectFee = computeFee(App.projectAlpha)
   App.projectOwner = await App.projects.getProjectOwner(projectHash)
   App.isProjectOwner = App.account == App.projectOwner
@@ -44,7 +44,7 @@ App.fundProject = async () => {
     return
   }
 
-  const valueToSend = web3.toWei(parseFloat(amount) *(1 + App.projectFee))
+  const valueToSend = web3.toBigNumber(calculateFee(web3.toWei(amount), App.projectAlpha)).add(web3.toWei(amount))
   await App.projects.fundProject(App.projectId, web3.toWei(amount), {value: valueToSend});
   window.location.reload()
 }
@@ -93,11 +93,11 @@ App.setProjectStatus = () => {
 
 App.setFee = () => {
   document.getElementById("project-fee").innerHTML = 
-    "<b>Funding Fee:</b> " + (computeFee(App.projectAlpha) * 100).toFixed(2) + "%"
+    "<b>Funding Fee:</b> " + (computeFee(App.projectAlpha/1000) * 100).toFixed(2) + "%"
 }
 
 App.setProjectAlpha = () => {
-  str = "<b>" + "Alpha Value: </b>" + App.projectAlpha * 100 + "%"
+  str = "<b>" + "Alpha Value: </b>" + App.projectAlpha/10  + "%"
   document.getElementById("project-alpha").innerHTML = str
 }
 
