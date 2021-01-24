@@ -4,7 +4,12 @@ let computeFee = (alpha) => {
 }
 
 function calculateFee(value, alpha) {
-  return Math.ceil(((value * alpha) / (1000 - alpha)))
+  let bigVal = web3.toBigNumber(value)
+  let bigAlpha = web3.toBigNumber(alpha)
+  let bigDenominator = web3.toBigNumber(1000 - alpha)
+  let remainder = bigVal.mul(bigAlpha).modulo(bigDenominator)
+  let result = bigVal.mul(bigAlpha).minus(remainder)
+  return result.div(bigDenominator).add(1)
 }
 
 App = {
