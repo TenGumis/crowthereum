@@ -27,7 +27,7 @@ App.loadProjectDetails = async () => {
   App.projectDeadline = await App.projects.getInvestmentDeadline(projectHash)
   App.numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
   App.profitToClaim = await App.projects.profitToClaim(projectHash)
-  App.fundsToReclaim = await App.projects.fundsToReclaim(projectHash, App.account)
+  App.fundsToReclaim = await App.projects.fundsToReclaim(projectHash, App.account, Math.round(new Date().getTime()/1000))
 }
 
 App.fundProject = async () => {

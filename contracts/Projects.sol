@@ -67,8 +67,8 @@ contract Projects {
     require(currentProject.investmentDeadline >= now);
     require(msg.value * (alphaRange - currentProject.alpha) >= alphaRange * _amount);
 
-    uint investedAmount = 0;
-    uint excessValue = 0;
+    uint investedAmount;
+    uint excessValue;
 
     if(currentProject.projectGoal <= currentProject.balance + _amount) {
       investedAmount = currentProject.projectGoal - currentProject.balance;  
@@ -95,7 +95,7 @@ contract Projects {
 
     require(msg.sender == projects[projectIndex].owner);
     require(projects[projectIndex].currentMilestone > projects[projectIndex].lastUnclaimedMilestone);
-    uint claimableFunds = 0;
+    uint claimableFunds;
     for (uint i = projects[projectIndex].lastUnclaimedMilestone;i < projects[projectIndex].currentMilestone;i++) {
       claimableFunds += projects[projectIndex].milestones[i].goal;
     }
@@ -114,7 +114,7 @@ contract Projects {
     uint numberOfMilestones = currentProject.numberOfMilestones;
     require(currentMilestone < numberOfMilestones);
     
-    uint amountToReturn = 0;
+    uint amountToReturn;
     if(isProjectFunded(_projectHash)) {
       require(currentProject.milestones[currentMilestone].deadline < now);
       for (uint i = currentMilestone; i < currentProject.numberOfMilestones; i++) {
@@ -209,7 +209,7 @@ contract Projects {
     return (project.balance == project.projectGoal);
   }
 
-  function fundsToReclaim(uint _projectHash, address _account) public view returns (uint) {
+  function fundsToReclaim(uint _projectHash, address _account, uint _time) public view returns (uint) {
     uint projectIndex = projectIdx[_projectHash];
     Project storage currentProject = projects[projectIndex];
     if(currentProject.pledgeOf[_account] == 0)
@@ -221,15 +221,17 @@ contract Projects {
 
     uint amountToReturn = 0;
     if(isProjectFunded(_projectHash)) {
-      if(currentProject.milestones[currentMilestone].deadline > now)
+      if(currentProject.milestones[currentMilestone].deadline > _time) {
         return 0;
+      }
       for (uint i = currentMilestone; i < currentProject.numberOfMilestones; i++) {
         amountToReturn += currentProject.milestones[i].goal;
       }
       amountToReturn = (amountToReturn * currentProject.pledgeOf[_account]) / currentProject.projectGoal;
     } else {
-      if(projects[projectIndex].investmentDeadline > now)
+      if(projects[projectIndex].investmentDeadline > _time) {
         return 0;
+      }
       amountToReturn = projects[projectIndex].pledgeOf[_account];
     }
 
