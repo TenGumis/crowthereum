@@ -19,14 +19,20 @@ App.loadProjectDetails = async () => {
   App.projectAlpha = parseFloat(await App.projects.getProjectAlpha(projectHash)) / 1000.0
   App.projectFee = computeFee(App.projectAlpha)
   App.projectOwner = await App.projects.getProjectOwner(projectHash)
+  App.isProjectOwner = App.account == App.projectOwner
   App.projectBalance = await App.projects.getProjectBalance(projectHash)
   App.projectGoal = await App.projects.getProjectGoal(projectHash)
   App.isProjectCompleted = await App.projects.isProjectCompleted(projectHash)
+  App.isProjectInvestor = await App.projects.isProjectInvestor(projectHash, App.account)
   App.isProjectFunded = await App.projects.isProjectFunded(projectHash)
   App.isProjectExpired = await App.isProjectExpired(projectHash)
   App.projectDeadline = await App.projects.getInvestmentDeadline(projectHash)
   App.numberOfMilestones = await App.projects.getNumberOfMilestones(projectHash)
-  App.profitToClaim = await App.projects.profitToClaim(projectHash)
+  if (App.isProjectOwner) {
+    App.profitToClaim = (await App.projects.profitToClaim(projectHash)).toNumber()
+  } else {
+    App.profitToClaim = 0
+  }
   App.fundsToReclaim = await App.projects.fundsToReclaim(projectHash, App.account, Math.round(new Date().getTime()/1000))
 }
 
@@ -180,7 +186,7 @@ App.setMilestoneButton = () => {
 
 App.setClaimFundsButton = () => {
   let div = document.getElementById("claim-funds-button")
-  if (App.account !== App.projectOwner || App.profitToClaim.toNumber() === 0)
+  if (!App.isProjectOwner || App.profitToClaim === 0)
     return
   document.getElementById("claim-funds-elem").style.display = ""
   div.style.display = ""
@@ -192,7 +198,7 @@ App.setReclaimInvestmentButton = () => {
     return
   let button = document.getElementById("reclaim-investment-button")
   button.style.display = ""
-  button.textContent = "Reclaim remaining: " + web3.fromWei(App.fundsToReclaim).round(4) + " ETH"
+  button.textContent = "Reclaim remaining: " + (web3.fromWei(App.fundsToReclaim)).round(4) + " ETH"
 }
 
 App.renderProjectDetails = async () => {
