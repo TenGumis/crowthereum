@@ -34,6 +34,13 @@ sudo apt install npm
 # for now in version 5.0.2
 sudo npm install -g truffle@5.0.2
 ```
+
+* Install **Dependencies**
+
+```bash
+npm install
+```
+
 ## How to run the project
 
 * run Ganache and have MetaMask connected to Ganache's instance
