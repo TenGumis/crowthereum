@@ -44,7 +44,7 @@ App.fundProject = async () => {
     return
   }
 
-  const valueToSend = web3.toBigNumber(calculateFee(web3.toWei(amount), App.projectAlpha)).add(web3.toWei(amount))
+  const valueToSend = web3.toBigNumber(calculateFee(web3.toWei(amount), App.projectAlpha)).add(web3.toWei(amount)).toString()
   await App.projects.fundProject(App.projectId, web3.toWei(amount), {value: valueToSend});
   window.location.reload()
 }
