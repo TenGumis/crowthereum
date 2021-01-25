@@ -4,7 +4,7 @@ let computeFee = (alpha) => {
 }
 
 function calculateFee(value, alpha) {
-  return web3.toBigNumber(value).mul(alpha).div(web3.toBigNumber(1000-alpha)).ceil().toString()
+  return web3.toBigNumber(value).mul(alpha).div(web3.toBigNumber(1000-alpha)).ceil()
 }
 
 App = {
