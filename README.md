@@ -9,6 +9,9 @@
 * fter the milestone is reached and investors that have funded that particular project acceptit, the funds associated with that milestone should be transferred to the project owner.(significantly less than 100% of investors should be required to accept the milestone)
 * In case a prespecified deadline is reached and a given milestone is not accepted, the fundsshould be returned to the investors.
 
+## Preview
+![](Crowthereum.gif)
+
 ## Installation
 
 Setup environment.
